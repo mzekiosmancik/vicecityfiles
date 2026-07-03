@@ -7,7 +7,7 @@ import {
   wikiEntriesQuery,
   wikiEntryBySlugQuery,
 } from "@/graphql/queries";
-import { MOCK_ARTICLES, MOCK_WIKI } from "@/lib/mock-data";
+//import { MOCK_ARTICLES, MOCK_WIKI } from "@/lib/mock-data";
 import { readingTime } from "@/lib/utils";
 import type { Article, WikiCategorySlug, WikiEntry } from "@/types";
 import type { RumorLevel } from "@/lib/constants";
