@@ -10,7 +10,7 @@ import type { Article, CommunityPost, MapRegion, Product, WikiEntry } from "@/ty
 
 /* ── Articles ───────────────────────────────────────── */
 
-const AUTHOR_MARA = { name: "Mara Delgado", slug: "mara-delgado", bio: "Lead investigator at Vice City Files." };
+const AUTHOR_MARA = { name: "Mezo", slug: "mara-delgado", bio: "Lead investigator at Vice City Files." };
 const AUTHOR_JAX = { name: "Jax Romero", slug: "jax-romero", bio: "Guides & analysis editor." };
 
 export const MOCK_ARTICLES: Article[] = [
@@ -67,7 +67,7 @@ export const MOCK_ARTICLES: Article[] = [
   {
     id: "a4",
     slug: "weather-system-hurricane-events",
-    title: "Dynamic Hurricane Events: Confirmed Weather Tech Explained",
+    title: "Test Dynamic Hurricane Events: Confirmed Weather Tech Explained",
     excerpt:
       "Storm cells that reroute traffic, flood streets, and change mission availability — here is everything officially shown about the weather simulation.",
     content:
@@ -118,7 +118,6 @@ export const MOCK_ARTICLES: Article[] = [
 /* ── Wiki ───────────────────────────────────────────── */
 
 export const MOCK_WIKI: WikiEntry[] = [
- 
   {
     id: "w3",
     slug: "banshee-gt",

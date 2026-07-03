@@ -138,11 +138,13 @@ export async function getArticles(options: { category?: string; limit?: number }
 
   if (data?.posts?.nodes?.length) return data.posts.nodes.map(mapPost);
 
-  let articles = [...MOCK_ARTICLES];
-  if (options.category) {
-    articles = articles.filter((a) => a.category.toLowerCase() === options.category!.toLowerCase());
-  }
-  return articles.slice(0, options.limit ?? 12);
+  // let articles = [...GET_ARTICLES];
+  // if (options.category) {
+  //   articles = articles.filter((a) => a.category.toLowerCase() === options.category!.toLowerCase());
+  // }
+  // return articles.slice(0, options.limit ?? 12);
+  // Only return real API results; if none, return empty array
+  return data?.posts?.nodes?.length ? data.posts.nodes.map(mapPost) : [];
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
@@ -152,8 +154,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
     { tags: ["wordpress", "articles", `article:${slug}`] },
   );
 
-  if (data?.post) return mapPost(data.post);
-  return MOCK_ARTICLES.find((a) => a.slug === slug) ?? null;
+  return data?.post ? mapPost(data.post) : null;
 }
 
 export async function getAllArticleSlugs(): Promise<{ slug: string; modified?: string }[]> {
@@ -162,8 +163,7 @@ export async function getAllArticleSlugs(): Promise<{ slug: string; modified?: s
     {},
     { tags: ["wordpress", "articles"] },
   );
-  if (data?.posts?.nodes?.length) return data.posts.nodes;
-  return MOCK_ARTICLES.map((a) => ({ slug: a.slug, modified: a.publishedAt }));
+  return data?.posts?.nodes?.length ? data.posts.nodes : [];
 }
 
 export async function getFeaturedArticles(limit = 3): Promise<Article[]> {
@@ -183,8 +183,7 @@ export async function getWikiEntries(category: WikiCategorySlug): Promise<WikiEn
   );
 
   const nodes = data?.[names.plural]?.nodes;
-  if (nodes?.length) return nodes.map((n) => mapWikiNode(n, category));
-  return MOCK_WIKI.filter((e) => e.category === category);
+  return nodes?.length ? nodes.map((n) => mapWikiNode(n, category)) : [];
 }
 
 export async function getWikiEntry(category: WikiCategorySlug, slug: string): Promise<WikiEntry | null> {
@@ -196,10 +195,33 @@ export async function getWikiEntry(category: WikiCategorySlug, slug: string): Pr
   );
 
   const node = data?.[names.singular];
-  if (node) return mapWikiNode(node, category);
-  return MOCK_WIKI.find((e) => e.category === category && e.slug === slug) ?? null;
+  return node ? mapWikiNode(node, category) : null;
 }
 
 export async function getAllWikiEntries(): Promise<WikiEntry[]> {
-  return MOCK_WIKI; // In production, aggregate per-category queries here.
+  const categories: WikiCategorySlug[] = [
+    "characters",
+    "vehicles",
+    "locations",
+    "weapons",
+    "missions",
+    "businesses",
+    "gangs",
+    "easter-eggs",
+  ];
+
+  const results = await Promise.all(
+    categories.map(async (category) => {
+      const names = WIKI_GRAPHQL_NAMES[category];
+      const data = await fetchGraphQL<Record<string, { nodes: WpWikiNode[] }>>(
+        wikiEntriesQuery(names.plural),
+        { first: 50 },
+        { tags: ["wordpress", "wiki", `wiki:${category}`] },
+      );
+      const nodes = data?.[names.plural]?.nodes;
+      return nodes?.length ? nodes.map((n) => mapWikiNode(n, category)) : [];
+    })
+  );
+
+  return results.flat();
 }
