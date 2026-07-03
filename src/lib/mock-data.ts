@@ -118,53 +118,7 @@ export const MOCK_ARTICLES: Article[] = [
 /* ── Wiki ───────────────────────────────────────────── */
 
 export const MOCK_WIKI: WikiEntry[] = [
-  {
-    id: "w1",
-    slug: "lucia-placeholder",
-    category: "characters",
-    title: "Lucia (Fan Dossier)",
-    summary:
-      "Community-compiled dossier on the rumored female co-lead: confirmed appearances, voice analysis, and fan theories about her backstory.",
-    content:
-      "## Overview\nThis dossier aggregates every publicly shown appearance and community analysis. It contains no leaked material.\n\n## Confirmed Appearances\nCatalogued shot list with timestamps and setting notes.\n\n## Theories\nTop-voted community theories with Rumor Meter ratings.",
-    heroImage: { url: "", alt: "Character dossier silhouette", placeholder: "pink" },
-    gallery: [
-      { url: "", alt: "Evidence shot 1", placeholder: "pink" },
-      { url: "", alt: "Evidence shot 2", placeholder: "purple" },
-      { url: "", alt: "Evidence shot 3", placeholder: "blue" },
-    ],
-    stats: [
-      { label: "Role", value: "Co-Protagonist (rumored)" },
-      { label: "First Seen", value: "Reveal Trailer" },
-      { label: "Affiliation", value: "Unknown" },
-      { label: "File Status", value: "Active Investigation" },
-    ],
-    tags: ["protagonist", "confirmed-character"],
-    relatedSlugs: ["jason-placeholder", "vice-beach"],
-    updatedAt: "2026-06-27T00:00:00Z",
-  },
-  {
-    id: "w2",
-    slug: "jason-placeholder",
-    category: "characters",
-    title: "Jason (Fan Dossier)",
-    summary: "Everything catalogued about the rumored male co-lead, from outfit analysis to voice actor speculation.",
-    content:
-      "## Overview\nFan-maintained profile built exclusively from official public material.\n\n## Analysis\nOutfit, posture, and dialogue-tone breakdowns from every public appearance.",
-    heroImage: { url: "", alt: "Character dossier silhouette", placeholder: "blue" },
-    gallery: [
-      { url: "", alt: "Evidence shot 1", placeholder: "blue" },
-      { url: "", alt: "Evidence shot 2", placeholder: "orange" },
-    ],
-    stats: [
-      { label: "Role", value: "Co-Protagonist (rumored)" },
-      { label: "First Seen", value: "Reveal Trailer" },
-      { label: "File Status", value: "Active Investigation" },
-    ],
-    tags: ["protagonist"],
-    relatedSlugs: ["lucia-placeholder"],
-    updatedAt: "2026-06-27T00:00:00Z",
-  },
+ 
   {
     id: "w3",
     slug: "banshee-gt",
