@@ -31,7 +31,12 @@ export async function fetchGraphQL<T>(
     if (!res.ok) throw new GraphQLError(`WPGraphQL responded ${res.status}`);
 
     const json = (await res.json()) as { data?: T; errors?: unknown[] };
-    if (json.errors?.length) throw new GraphQLError("WPGraphQL returned errors", json.errors);
+    if (json.errors?.length) {
+      throw new GraphQLError(
+        `WPGraphQL returned errors: ${JSON.stringify(json.errors)}`,
+        json.errors,
+      );
+    }
 
     return json.data ?? null;
   } catch (error) {

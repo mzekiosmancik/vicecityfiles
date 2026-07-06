@@ -3,6 +3,7 @@ import { Clapperboard, Image as ImageIcon, MonitorPlay, Palette } from "lucide-r
 import { SectionHeading } from "@/components/shared/section-heading";
 import { StaggerContainer, StaggerItem } from "@/components/shared/motion";
 import { MediaImage } from "@/components/shared/media-image";
+import type { ImageAsset } from "@/types";
 
 const MEDIA_TILES = [
   {
@@ -35,7 +36,11 @@ const MEDIA_TILES = [
   },
 ];
 
-export function MediaGallerySection() {
+interface MediaGallerySectionProps {
+  images?: ImageAsset[];
+}
+
+export function MediaGallerySection({ images = [] }: MediaGallerySectionProps) {
   return (
     <section className="container py-20" aria-labelledby="media-gallery">
       <SectionHeading
@@ -44,12 +49,12 @@ export function MediaGallerySection() {
         description="Wallpapers, fanart, video breakdowns, and the complete trailer archive."
       />
       <StaggerContainer className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {MEDIA_TILES.map((tile) => (
+        {MEDIA_TILES.map((tile, i) => (
           <StaggerItem key={tile.label} className="h-full">
             <Link href={tile.href} className="group block h-full">
               <div className="glass neon-border-hover h-full overflow-hidden rounded-lg">
                 <MediaImage
-                  image={{ url: "", alt: `${tile.label} preview`, placeholder: tile.placeholder }}
+                  image={images[i] ?? { url: "", alt: `${tile.label} preview`, placeholder: tile.placeholder }}
                   className="aspect-video w-full transition-transform duration-500 group-hover:scale-105"
                   sizes="(max-width: 640px) 100vw, 25vw"
                 />
