@@ -4,13 +4,14 @@ import {
   GET_ARTICLES,
   GET_ARTICLE_BY_SLUG,
   GET_ALL_ARTICLE_SLUGS,
+  GET_GALERY_ITEMS,
   wikiEntriesQuery,
   wikiEntryBySlugQuery,
 } from "@/graphql/queries";
-import { MOCK_ARTICLES, MOCK_WIKI } from "@/lib/mock-data";
+//import { MOCK_ARTICLES, MOCK_WIKI } from "@/lib/mock-data";
 import { readingTime } from "@/lib/utils";
-import type { Article, WikiCategorySlug, WikiEntry } from "@/types";
-import type { RumorLevel } from "@/lib/constants";
+import type { Article, ImageAsset, WikiCategorySlug, WikiEntry } from "@/types";
+import { RUMOR_LEVELS, type RumorLevel } from "@/lib/constants";
 
 /* ── WPGraphQL response shapes ──────────────────────── */
 
@@ -32,7 +33,7 @@ interface WpPost {
   tags?: { nodes: { name: string }[] };
   author?: { node: { name: string; slug: string; avatar?: { url: string } } };
   featuredImage?: { node: WpImage };
-  articleFields?: { rumorLevel?: string; featured?: boolean };
+  articlefields?: { rumorlevel?: string | string[]; featured?: boolean };
 }
 
 interface WpWikiNode {
@@ -42,11 +43,11 @@ interface WpWikiNode {
   modified: string;
   content: string;
   featuredImage?: { node: WpImage };
-  wikiFields?: {
+  wikifields?: {
     summary?: string;
     stats?: string;
-    relatedSlugs?: string;
-    gallery?: WpImage[];
+    relatedslugs?: string;
+    image?: { node: WpImage };
   };
 }
 
@@ -82,9 +83,16 @@ function mapPost(post: WpPost): Article {
         }
       : { url: "", alt: stripHtml(post.title), placeholder: "purple" },
     readTime: readingTime(content),
-    rumorLevel: (post.articleFields?.rumorLevel as RumorLevel) ?? undefined,
-    featured: post.articleFields?.featured ?? false,
+    rumorLevel: normalizeRumorLevel(post.articlefields?.rumorlevel),
+    featured: post.articlefields?.featured ?? false,
   };
+}
+
+function normalizeRumorLevel(raw?: string | string[]): RumorLevel | undefined {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (!value) return undefined;
+  const key = value.toLowerCase() as RumorLevel;
+  return key in RUMOR_LEVELS ? key : undefined;
 }
 
 const WIKI_GRAPHQL_NAMES: Record<WikiCategorySlug, { singular: string; plural: string }> = {
@@ -104,15 +112,17 @@ function mapWikiNode(node: WpWikiNode, category: WikiCategorySlug): WikiEntry {
     slug: node.slug,
     category,
     title: stripHtml(node.title),
-    summary: node.wikiFields?.summary ?? "",
+    summary: node.wikifields?.summary ?? "",
     content: stripHtml(node.content ?? ""),
     heroImage: node.featuredImage
       ? { url: node.featuredImage.node.sourceUrl, alt: node.featuredImage.node.altText || node.title }
       : { url: "", alt: node.title, placeholder: "purple" },
-    gallery: node.wikiFields?.gallery?.map((g) => ({ url: g.sourceUrl, alt: g.altText })) ?? [],
-    stats: safeParseStats(node.wikiFields?.stats),
+    gallery: node.wikifields?.image
+      ? [{ url: node.wikifields.image.node.sourceUrl, alt: node.wikifields.image.node.altText || node.title }]
+      : [],
+    stats: safeParseStats(node.wikifields?.stats),
     tags: [],
-    relatedSlugs: node.wikiFields?.relatedSlugs?.split(",").map((s) => s.trim()) ?? [],
+    relatedSlugs: node.wikifields?.relatedslugs?.split(",").map((s: string) => s.trim()) ?? [],
     updatedAt: node.modified,
   };
 }
@@ -138,11 +148,13 @@ export async function getArticles(options: { category?: string; limit?: number }
 
   if (data?.posts?.nodes?.length) return data.posts.nodes.map(mapPost);
 
-  let articles = [...MOCK_ARTICLES];
-  if (options.category) {
-    articles = articles.filter((a) => a.category.toLowerCase() === options.category!.toLowerCase());
-  }
-  return articles.slice(0, options.limit ?? 12);
+  // let articles = [...GET_ARTICLES];
+  // if (options.category) {
+  //   articles = articles.filter((a) => a.category.toLowerCase() === options.category!.toLowerCase());
+  // }
+  // return articles.slice(0, options.limit ?? 12);
+  // Only return real API results; if none, return empty array
+  return data?.posts?.nodes?.length ? data.posts.nodes.map(mapPost) : [];
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
@@ -152,8 +164,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
     { tags: ["wordpress", "articles", `article:${slug}`] },
   );
 
-  if (data?.post) return mapPost(data.post);
-  return MOCK_ARTICLES.find((a) => a.slug === slug) ?? null;
+  return data?.post ? mapPost(data.post) : null;
 }
 
 export async function getAllArticleSlugs(): Promise<{ slug: string; modified?: string }[]> {
@@ -162,8 +173,7 @@ export async function getAllArticleSlugs(): Promise<{ slug: string; modified?: s
     {},
     { tags: ["wordpress", "articles"] },
   );
-  if (data?.posts?.nodes?.length) return data.posts.nodes;
-  return MOCK_ARTICLES.map((a) => ({ slug: a.slug, modified: a.publishedAt }));
+  return data?.posts?.nodes?.length ? data.posts.nodes : [];
 }
 
 export async function getFeaturedArticles(limit = 3): Promise<Article[]> {
@@ -183,8 +193,7 @@ export async function getWikiEntries(category: WikiCategorySlug): Promise<WikiEn
   );
 
   const nodes = data?.[names.plural]?.nodes;
-  if (nodes?.length) return nodes.map((n) => mapWikiNode(n, category));
-  return MOCK_WIKI.filter((e) => e.category === category);
+  return nodes?.length ? nodes.map((n) => mapWikiNode(n, category)) : [];
 }
 
 export async function getWikiEntry(category: WikiCategorySlug, slug: string): Promise<WikiEntry | null> {
@@ -196,10 +205,59 @@ export async function getWikiEntry(category: WikiCategorySlug, slug: string): Pr
   );
 
   const node = data?.[names.singular];
-  if (node) return mapWikiNode(node, category);
-  return MOCK_WIKI.find((e) => e.category === category && e.slug === slug) ?? null;
+  return node ? mapWikiNode(node, category) : null;
 }
 
 export async function getAllWikiEntries(): Promise<WikiEntry[]> {
-  return MOCK_WIKI; // In production, aggregate per-category queries here.
+  const categories: WikiCategorySlug[] = [
+    "characters",
+    "vehicles",
+    "locations",
+    "weapons",
+    "missions",
+    "businesses",
+    "gangs",
+    "easter-eggs",
+  ];
+
+  const results = await Promise.all(
+    categories.map(async (category) => {
+      const names = WIKI_GRAPHQL_NAMES[category];
+      const data = await fetchGraphQL<Record<string, { nodes: WpWikiNode[] }>>(
+        wikiEntriesQuery(names.plural),
+        { first: 50 },
+        { tags: ["wordpress", "wiki", `wiki:${category}`] },
+      );
+      const nodes = data?.[names.plural]?.nodes;
+      return nodes?.length ? nodes.map((n) => mapWikiNode(n, category)) : [];
+    })
+  );
+
+  return results.flat();
+}
+
+/* ── Public API: Media Gallery ──────────────────────── */
+
+interface WpGaleryNode {
+  id: string;
+  title: string;
+  featuredImage?: { node: WpImage };
+}
+
+export async function getGaleryImages(limit = 12): Promise<ImageAsset[]> {
+  const data = await fetchGraphQL<{ galeries: { nodes: WpGaleryNode[] } }>(
+    GET_GALERY_ITEMS,
+    { first: limit },
+    { tags: ["wordpress", "galery"] },
+  );
+
+  const nodes = data?.galeries?.nodes ?? [];
+  return nodes
+    .filter((n) => n.featuredImage)
+    .map((n) => ({
+      url: n.featuredImage!.node.sourceUrl,
+      alt: n.featuredImage!.node.altText || stripHtml(n.title),
+      width: n.featuredImage!.node.mediaDetails?.width,
+      height: n.featuredImage!.node.mediaDetails?.height,
+    }));
 }

@@ -7,17 +7,18 @@ import { CharacterSpotlight } from "@/features/home/character-spotlight";
 import { MerchPreview } from "@/features/home/merch-preview";
 import { MediaGallerySection } from "@/features/home/media-gallery";
 import { CommunitySection } from "@/features/home/community-section";
-import { getArticles, getFeaturedArticles, getWikiEntries } from "@/services/wordpress";
+import { getArticles, getFeaturedArticles, getGaleryImages, getWikiEntries } from "@/services/wordpress";
 import { getFeaturedProducts } from "@/services/woocommerce";
 
 export const revalidate = 300; // ISR — refresh every 5 minutes
 
 export default async function HomePage() {
-  const [tickerArticles, featuredArticles, characters, products] = await Promise.all([
+  const [tickerArticles, featuredArticles, characters, products, galeryImages] = await Promise.all([
     getArticles({ limit: 6 }),
     getFeaturedArticles(3),
     getWikiEntries("characters"),
     getFeaturedProducts(4),
+    getGaleryImages(4),
   ]);
 
   return (
@@ -37,7 +38,7 @@ export default async function HomePage() {
       {/* 7. Merch preview */}
       <MerchPreview products={products} />
       {/* 8. Media gallery */}
-      <MediaGallerySection />
+      <MediaGallerySection images={galeryImages} />
       {/* 9. Community + newsletter */}
       <CommunitySection />
     </>

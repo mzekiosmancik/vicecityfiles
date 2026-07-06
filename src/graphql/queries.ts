@@ -6,8 +6,8 @@
  * - Custom post types (all `show_in_graphql: true`):
  *   character, vehicle, location, weapon, mission, business, gang, easterEgg
  * - ACF field groups exposed through WPGraphQL for ACF:
- *   `wikiFields` (summary, stats, gallery, relatedSlugs)
- *   `articleFields` (rumorLevel, featured)
+ *   `wikifields` (summary, stats, image, relatedslugs)
+ *   `articlefields` (rumorlevel, featured)
  * - Products come from WooCommerce via WooGraphQL.
  */
 
@@ -49,8 +49,8 @@ export const ARTICLE_FRAGMENT = /* GraphQL */ `
         }
       }
     }
-    articleFields {
-      rumorLevel
+    articlefields {
+      rumorlevel
       featured
     }
   }
@@ -98,6 +98,28 @@ export const GET_ALL_ARTICLE_SLUGS = /* GraphQL */ `
   }
 `;
 
+/** Homepage media gallery — sourced from the `galery` CPT. */
+export const GET_GALERY_ITEMS = /* GraphQL */ `
+  query GetGaleryItems($first: Int = 12) {
+    galeries(first: $first, where: { status: PUBLISH }) {
+      nodes {
+        id
+        title
+        featuredImage {
+          node {
+            sourceUrl
+            altText
+            mediaDetails {
+              width
+              height
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 /** Generic wiki CPT query — interpolate the camelCase graphql plural name. */
 export const wikiEntriesQuery = (graphqlPlural: string) => /* GraphQL */ `
   query GetWikiEntries($first: Int = 50) {
@@ -113,13 +135,15 @@ export const wikiEntriesQuery = (graphqlPlural: string) => /* GraphQL */ `
             altText
           }
         }
-        wikiFields {
+        wikifields {
           summary
           stats
-          relatedSlugs
-          gallery {
-            sourceUrl
-            altText
+          relatedslugs
+          image {
+            node {
+              sourceUrl
+              altText
+            }
           }
         }
         content
@@ -142,13 +166,15 @@ export const wikiEntryBySlugQuery = (graphqlSingular: string) => /* GraphQL */ `
           altText
         }
       }
-      wikiFields {
+      wikifields {
         summary
         stats
-        relatedSlugs
-        gallery {
-          sourceUrl
-          altText
+        relatedslugs
+        image {
+          node {
+            sourceUrl
+            altText
+          }
         }
       }
     }
