@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "**.wp.com" },
-      { protocol: "https", hostname: process.env.WORDPRESS_HOSTNAME ?? "cms.vicecityfiles.com" },
+      { protocol: "https", hostname: process.env.WORDPRESS_HOSTNAME || "cms.vicecityfiles.com" },
     ],
   },
   async headers() {
