@@ -14,21 +14,26 @@ import {
   getArticles,
   getFeaturedArticles,
   getGaleryImages,
+  getMapImage,
   getWikiEntries,
 } from "@/services/wordpress";
 import { getFeaturedProducts } from "@/services/woocommerce";
+import { buildMapRegions } from "@/lib/map";
 
 export const revalidate = 300; // ISR — refresh every 5 minutes
 
 export default async function HomePage() {
-  const [recentArticles, featuredArticles, characters, products, galeryImages, wikiEntries] = await Promise.all([
-    getArticles({ limit: 24 }), // same request getFeaturedArticles makes, so Next dedupes it
-    getFeaturedArticles(3),
-    getWikiEntries("characters"),
-    getFeaturedProducts(4),
-    getGaleryImages(4),
-    getAllWikiEntries(),
-  ]);
+  const [recentArticles, featuredArticles, characters, products, galeryImages, wikiEntries, mapImage] =
+    await Promise.all([
+      getArticles({ limit: 24 }), // same request getFeaturedArticles makes, so Next dedupes it
+      getFeaturedArticles(3),
+      getWikiEntries("characters"),
+      getFeaturedProducts(4),
+      getGaleryImages(4),
+      getAllWikiEntries(),
+      getMapImage(),
+    ]);
+  const mapRegions = buildMapRegions(wikiEntries);
   const tickerArticles = recentArticles.slice(0, 6);
   const recentWiki = [...wikiEntries]
     .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
@@ -57,7 +62,9 @@ export default async function HomePage() {
         ]
       : []),
     { key: "wiki", render: (i) => <WikiCategoriesSection index={i} recent={recentWiki} /> },
-    { key: "map", render: (i) => <MapPreviewSection index={i} /> },
+    ...(mapRegions.length
+      ? [{ key: "map", render: (i: number) => <MapPreviewSection index={i} regions={mapRegions} mapImage={mapImage} /> }]
+      : []),
     ...(character
       ? [{ key: "character", render: (i: number) => <CharacterSpotlight character={character} index={i} /> }]
       : []),

@@ -138,20 +138,6 @@ export interface CommunityPost {
   image?: ImageAsset;
 }
 
-/* ── Map ────────────────────────────────────────────── */
-
-export interface MapRegion {
-  id: string;
-  name: string;
-  description: string;
-  color: string;
-  /** SVG path for the stylized fallback map */
-  path: string;
-  /** [lng, lat] for Mapbox mode */
-  center: [number, number];
-  wikiSlug?: string;
-}
-
 /* ── Search ─────────────────────────────────────────── */
 
 export interface SearchResult {

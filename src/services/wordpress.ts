@@ -5,6 +5,7 @@ import {
   GET_ARTICLE_BY_SLUG,
   GET_ALL_ARTICLE_SLUGS,
   GET_GALERY_ITEMS,
+  GET_MAP_IMAGE,
   wikiEntriesQuery,
   wikiEntryBySlugQuery,
 } from "@/graphql/queries";
@@ -127,14 +128,29 @@ function mapWikiNode(node: WpWikiNode, category: WikiCategorySlug): WikiEntry {
   };
 }
 
+/**
+ * Stats come from a free-text ACF field. Editors write them as "Key: Value" lines
+ * (e.g. "Region: Vice City\nTagline: Everything in Excess"); a JSON array of
+ * { label, value } is also accepted.
+ */
 function safeParseStats(raw?: string): { label: string; value: string }[] {
-  if (!raw) return [];
+  if (!raw?.trim()) return [];
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (Array.isArray(parsed)) return parsed;
   } catch {
-    return [];
+    // not JSON — fall through to line parsing
   }
+  return raw
+    .split(/\r?\n/)
+    .map((line) => {
+      const i = line.indexOf(":");
+      if (i <= 0) return null;
+      const label = stripHtml(line.slice(0, i)).trim();
+      const value = stripHtml(line.slice(i + 1)).trim();
+      return label && value ? { label, value } : null;
+    })
+    .filter((s): s is { label: string; value: string } => s !== null);
 }
 
 /* ── Public API: Articles ───────────────────────────── */
@@ -260,4 +276,22 @@ export async function getGaleryImages(limit = 12): Promise<ImageAsset[]> {
       width: n.featuredImage!.node.mediaDetails?.width,
       height: n.featuredImage!.node.mediaDetails?.height,
     }));
+}
+
+/* ── Public API: City Grid map image ────────────────── */
+
+/**
+ * Map art for the City Grid. Upload an image to the WordPress media library with the
+ * slug `city-grid-map` to replace the built-in illustrated map. Returns null if absent.
+ */
+export async function getMapImage(): Promise<ImageAsset | null> {
+  const data = await fetchGraphQL<{ mediaItem: WpImage | null }>(GET_MAP_IMAGE, {}, { tags: ["wordpress", "map"] });
+  const item = data?.mediaItem;
+  if (!item?.sourceUrl) return null;
+  return {
+    url: item.sourceUrl,
+    alt: item.altText || "Map of Leonida",
+    width: item.mediaDetails?.width,
+    height: item.mediaDetails?.height,
+  };
 }

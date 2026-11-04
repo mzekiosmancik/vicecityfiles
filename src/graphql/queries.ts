@@ -284,3 +284,17 @@ export const SEARCH_CONTENT = /* GraphQL */ `
     }
   }
 `;
+
+/** Optional City Grid map image: a WordPress media item with the slug `city-grid-map`. */
+export const GET_MAP_IMAGE = /* GraphQL */ `
+  query GetMapImage {
+    mediaItem(id: "city-grid-map", idType: SLUG) {
+      sourceUrl
+      altText
+      mediaDetails {
+        width
+        height
+      }
+    }
+  }
+`;

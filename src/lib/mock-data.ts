@@ -1,4 +1,4 @@
-import type { Article, CommunityPost, MapRegion, Product, WikiEntry } from "@/types";
+import type { Article, CommunityPost, Product, WikiEntry } from "@/types";
 
 /**
  * Development/demo content. In production every getter in `src/services`
@@ -456,59 +456,5 @@ export const MOCK_COMMUNITY: CommunityPost[] = [
     comments: 156,
     createdAt: "2026-06-19T00:00:00Z",
     image: { url: "", alt: "Swamp region evidence collage", placeholder: "purple" },
-  },
-];
-
-/* ── Map regions (stylized fan map) ─────────────────── */
-
-export const MAP_REGIONS: MapRegion[] = [
-  {
-    id: "vice-beach",
-    name: "Vice Beach",
-    description: "Neon beachfront, art-deco hotels, and the famous strip.",
-    color: "#ff2d95",
-    path: "M 70 12 L 84 14 L 88 40 L 84 72 L 74 88 L 68 70 L 70 40 Z",
-    center: [-80.13, 25.79],
-    wikiSlug: "vice-beach",
-  },
-  {
-    id: "downtown",
-    name: "Downtown",
-    description: "Glass towers, financial district, and the metro core.",
-    color: "#00e5ff",
-    path: "M 42 30 L 64 26 L 66 52 L 60 66 L 44 62 L 40 44 Z",
-    center: [-80.19, 25.77],
-  },
-  {
-    id: "little-cuba",
-    name: "Little Cuba",
-    description: "Markets, cafés, and the most alive streets in the city.",
-    color: "#ff7849",
-    path: "M 24 46 L 40 44 L 44 62 L 38 78 L 22 72 Z",
-    center: [-80.22, 25.76],
-  },
-  {
-    id: "port-vice",
-    name: "Port Vice",
-    description: "Container yards, smuggler docks, and industrial sprawl.",
-    color: "#a855f7",
-    path: "M 40 64 L 58 68 L 62 86 L 44 92 L 36 80 Z",
-    center: [-80.17, 25.74],
-  },
-  {
-    id: "north-shores",
-    name: "North Shores",
-    description: "Mansions, marinas, and old money on the water.",
-    color: "#39ff88",
-    path: "M 46 8 L 66 6 L 64 26 L 42 30 Z",
-    center: [-80.16, 25.85],
-  },
-  {
-    id: "the-glades",
-    name: "The Glades",
-    description: "Swamplands, airboats, and things best left unfound.",
-    color: "#ffe14d",
-    path: "M 6 54 L 22 48 L 22 72 L 30 90 L 10 92 Z",
-    center: [-80.4, 25.72],
   },
 ];
