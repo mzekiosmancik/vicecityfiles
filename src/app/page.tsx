@@ -8,19 +8,32 @@ import { CharacterSpotlight } from "@/features/home/character-spotlight";
 import { MerchPreview } from "@/features/home/merch-preview";
 import { MediaGallerySection } from "@/features/home/media-gallery";
 import { CommunitySection } from "@/features/home/community-section";
-import { getArticles, getFeaturedArticles, getGaleryImages, getWikiEntries } from "@/services/wordpress";
+import { INTEL_BOARD_MIN_RATED, IntelBoard, rateableArticles } from "@/features/home/intel-board";
+import {
+  getAllWikiEntries,
+  getArticles,
+  getFeaturedArticles,
+  getGaleryImages,
+  getWikiEntries,
+} from "@/services/wordpress";
 import { getFeaturedProducts } from "@/services/woocommerce";
 
 export const revalidate = 300; // ISR — refresh every 5 minutes
 
 export default async function HomePage() {
-  const [tickerArticles, featuredArticles, characters, products, galeryImages] = await Promise.all([
-    getArticles({ limit: 6 }),
+  const [recentArticles, featuredArticles, characters, products, galeryImages, wikiEntries] = await Promise.all([
+    getArticles({ limit: 24 }), // same request getFeaturedArticles makes, so Next dedupes it
     getFeaturedArticles(3),
     getWikiEntries("characters"),
     getFeaturedProducts(4),
     getGaleryImages(4),
+    getAllWikiEntries(),
   ]);
+  const tickerArticles = recentArticles.slice(0, 6);
+  const recentWiki = [...wikiEntries]
+    .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
+    .slice(0, 10);
+  const showIntelBoard = rateableArticles(recentArticles).length >= INTEL_BOARD_MIN_RATED;
 
   // Hero headline: newest confirmed story, else the newest story of any kind.
   const top = tickerArticles.find((a) => a.rumorLevel === "confirmed") ?? tickerArticles[0];
@@ -33,7 +46,17 @@ export default async function HomePage() {
   const character = characters[0] ?? null;
   const sections: { key: string; render: (index: number) => React.ReactNode }[] = [
     { key: "featured", render: (i) => <FeaturedArticles articles={featuredArticles} index={i} /> },
-    { key: "wiki", render: (i) => <WikiCategoriesSection index={i} /> },
+    ...(showIntelBoard
+      ? [
+          {
+            key: "intel",
+            render: (i: number) => (
+              <IntelBoard articles={recentArticles} excludeSlugs={featuredArticles.map((a) => a.slug)} index={i} />
+            ),
+          },
+        ]
+      : []),
+    { key: "wiki", render: (i) => <WikiCategoriesSection index={i} recent={recentWiki} /> },
     { key: "map", render: (i) => <MapPreviewSection index={i} /> },
     ...(character
       ? [{ key: "character", render: (i: number) => <CharacterSpotlight character={character} index={i} /> }]
