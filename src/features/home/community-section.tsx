@@ -42,7 +42,7 @@ export function CommunitySection({ index }: { index: number }) {
   };
 
   return (
-    <section className="container py-20" aria-labelledby="community">
+    <section className="container py-14 sm:py-20" aria-labelledby="community">
       <SectionHeading id="community"
         eyebrow={sectionEyebrow(index, "The Bureau")}
         title="Join the Investigation"

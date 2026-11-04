@@ -18,7 +18,7 @@ const CTA_SPAN: Record<number, string> = {
 export function MerchPreview({ products, index }: { products: Product[]; index: number }) {
   const shown = products.slice(0, GRID_SLOTS);
   return (
-    <section className="container py-20" aria-labelledby="merch-preview">
+    <section className="container py-14 sm:py-20" aria-labelledby="merch-preview">
       <div className="flex items-end justify-between gap-4">
         <SectionHeading id="merch-preview"
           eyebrow={sectionEyebrow(index, "Contraband")}

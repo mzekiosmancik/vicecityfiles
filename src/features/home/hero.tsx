@@ -67,10 +67,14 @@ export function Hero({ headline }: { headline?: LaunchHeadline | null }) {
       {/* bottom fade */}
       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent" aria-hidden="true" />
 
-      <div className="container relative z-10 grid items-center gap-12 pb-24 pt-24 xl:grid-cols-[minmax(0,1fr)_400px] xl:pb-0">
-        <div>
+      {/*
+        Phones: intro → launch panel → details, so the countdown lands in the first screen.
+        xl: intro + details stacked on the left, panel spanning both rows on the right.
+      */}
+      <div className="container relative z-10 grid items-center gap-8 pb-12 pt-24 sm:gap-12 sm:pb-24 xl:grid-cols-[minmax(0,1fr)_400px] xl:grid-rows-[auto_auto] xl:gap-y-0 xl:pb-0">
+        <div className="xl:col-start-1 xl:row-start-1 xl:self-end">
           <p
-            className="animate-rise-in motion-reduce:animate-none [animation-delay:0ms] evidence-tag mb-6"
+            className="animate-rise-in motion-reduce:animate-none [animation-delay:0ms] evidence-tag mb-4 sm:mb-6"
           >
             Case File 001 — {SITE.altTagline}
           </p>
@@ -82,9 +86,15 @@ export function Hero({ headline }: { headline?: LaunchHeadline | null }) {
             <br />
             <span className="text-neon-blue-glow">Files</span>
           </h1>
+        </div>
 
+        <div className="animate-rise-in motion-reduce:animate-none [animation-delay:300ms] xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:justify-self-end">
+          <LaunchPanel headline={headline} />
+        </div>
+
+        <div className="xl:col-start-1 xl:row-start-2 xl:self-start">
           <p
-            className="animate-rise-in motion-reduce:animate-none [animation-delay:200ms] mt-6 max-w-xl text-lg text-muted-foreground"
+            className="animate-rise-in motion-reduce:animate-none [animation-delay:200ms] max-w-xl text-base sm:text-lg xl:mt-6 text-muted-foreground"
           >
             The ultimate fan archive for news, guides, characters, vehicles, maps, theories, and merchandise.
           </p>
@@ -96,7 +106,7 @@ export function Hero({ headline }: { headline?: LaunchHeadline | null }) {
           </p>
 
           <div
-            className="animate-rise-in motion-reduce:animate-none [animation-delay:400ms] mt-10 flex flex-wrap gap-4"
+            className="animate-rise-in motion-reduce:animate-none [animation-delay:400ms] mt-8 flex flex-wrap gap-3 sm:mt-10 sm:gap-4"
           >
             <Button asChild size="lg" variant="gradient">
               <Link href="/wiki">
@@ -124,10 +134,6 @@ export function Hero({ headline }: { headline?: LaunchHeadline | null }) {
             <ArrowRight className="h-3 w-3 rotate-90 animate-float" aria-hidden="true" />
             Scroll to open the case files
           </div>
-        </div>
-
-        <div className="animate-rise-in motion-reduce:animate-none [animation-delay:500ms] xl:justify-self-end">
-          <LaunchPanel headline={headline} />
         </div>
       </div>
     </section>

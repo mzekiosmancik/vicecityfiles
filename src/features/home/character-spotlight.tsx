@@ -11,7 +11,7 @@ export function CharacterSpotlight({ character, index }: { character: WikiEntry 
   if (!character) return null;
 
   return (
-    <section className="container py-20" aria-labelledby="character-spotlight">
+    <section className="container py-14 sm:py-20" aria-labelledby="character-spotlight">
       <SectionHeading id="character-spotlight" eyebrow={sectionEyebrow(index, "Persons of Interest")} title="Character Spotlight" />
       <SlideUp>
         <div className="glass overflow-hidden rounded-lg lg:grid lg:grid-cols-2">

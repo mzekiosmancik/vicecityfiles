@@ -53,7 +53,7 @@ export function MediaGallerySection({ images = [], index }: MediaGallerySectionP
   // Image tiles only when every tile has one; a mix of photos and placeholders looks broken.
   const withImages = images.length >= MEDIA_TILES.length;
   return (
-    <section className="container py-20" aria-labelledby="media-gallery">
+    <section className="container py-14 sm:py-20" aria-labelledby="media-gallery">
       <SectionHeading id="media-gallery"
         eyebrow={sectionEyebrow(index, "Evidence Locker")}
         title="Media Gallery"

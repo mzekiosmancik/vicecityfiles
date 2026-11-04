@@ -4,7 +4,7 @@ import { ViceMap } from "@/features/map/vice-map";
 
 export function MapPreviewSection({ index }: { index: number }) {
   return (
-    <section className="container py-20" aria-labelledby="map-preview">
+    <section className="container py-14 sm:py-20" aria-labelledby="map-preview">
       <SectionHeading id="map-preview"
         eyebrow={sectionEyebrow(index, "Cartography Division")}
         title="The City Grid"

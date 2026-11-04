@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SectionHeading, sectionEyebrow } from "@/components/shared/section-heading";
+import { MobileMoreLink } from "@/components/shared/mobile-more-link";
 import { WikiCard } from "@/components/shared/wiki-card";
 import { StaggerContainer, StaggerItem } from "@/components/shared/motion";
 import { WIKI_CATEGORIES } from "@/lib/constants";
 
 export function WikiCategoriesSection({ index }: { index: number }) {
   return (
-    <section className="container py-20" aria-labelledby="wiki-categories">
+    <section className="container py-14 sm:py-20" aria-labelledby="wiki-categories">
       <div className="flex items-end justify-between gap-4">
         <SectionHeading id="wiki-categories"
           eyebrow={sectionEyebrow(index, "The Archive")}
@@ -22,13 +23,14 @@ export function WikiCategoriesSection({ index }: { index: number }) {
         </Link>
       </div>
 
-      <StaggerContainer className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <StaggerContainer className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
         {WIKI_CATEGORIES.map((category) => (
           <StaggerItem key={category.slug} className="h-full">
-            <WikiCard {...category} />
+            <WikiCard {...category} compact />
           </StaggerItem>
         ))}
       </StaggerContainer>
+      <MobileMoreLink href="/wiki">All files</MobileMoreLink>
     </section>
   );
 }
