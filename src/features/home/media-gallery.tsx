@@ -33,18 +33,18 @@ const MEDIA_TILES = [
   {
     label: "Videos",
     kind: "video" as const,
-    description: "Analysis breakdowns & documentaries",
-    icon: MonitorPlay,
+    description: "Official trailers & videos",
+    icon: Clapperboard,
     href: "/media#videos",
-    placeholder: "blue" as const,
+    placeholder: "orange" as const,
   },
   {
-    label: "Trailers",
-    kind: "trailer" as const,
-    description: "Official trailers from Rockstar",
-    icon: Clapperboard,
-    href: "/media#trailers",
-    placeholder: "orange" as const,
+    label: "Breakdowns",
+    kind: "breakdown" as const,
+    description: "Analysis breakdowns & documentaries",
+    icon: MonitorPlay,
+    href: "/media#breakdowns",
+    placeholder: "blue" as const,
   },
 ];
 

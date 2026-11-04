@@ -99,9 +99,12 @@ export const GET_ALL_ARTICLE_SLUGS = /* GraphQL */ `
 `;
 
 /**
- * Media gallery — the `galery` CPT. Each post is one media item: featured image = artwork
- * or thumbnail; `wikifields.stats` carries "Type: Wallpaper | Fan Art | Video | Trailer",
- * plus optional "Artist:", "Artist URL:", "Credit:" and "YouTube:" lines.
+ * Media gallery — the `galery` CPT. ACF group `galeryFields`:
+ *   category      select: Wallpaper | Fan Arts | Video | Video Breakdown
+ *   videourl      YouTube link (Video / Video Breakdown)
+ *   wallpaperurl  full-resolution file (Wallpaper)
+ * Featured image = the artwork or a custom thumbnail. `wikifields.summary` is the caption;
+ * `wikifields.stats` may add "Credit:" / "Artist:" and "Credit URL:" / "Artist URL:" lines.
  */
 export const GET_GALERY_ITEMS = /* GraphQL */ `
   query GetGaleryItems($first: Int = 100) {
@@ -110,7 +113,6 @@ export const GET_GALERY_ITEMS = /* GraphQL */ `
         id
         title
         date
-        content
         featuredImage {
           node {
             sourceUrl
@@ -121,27 +123,14 @@ export const GET_GALERY_ITEMS = /* GraphQL */ `
             }
           }
         }
+        galeryFields {
+          category
+          videourl
+          wallpaperurl
+        }
         wikifields {
           summary
           stats
-        }
-      }
-    }
-  }
-`;
-
-/** Media library lookup by slug (used for default wallpapers). */
-export const GET_MEDIA_BY_SLUGS = /* GraphQL */ `
-  query GetMediaBySlugs($slugs: [String]) {
-    mediaItems(first: 50, where: { nameIn: $slugs }) {
-      nodes {
-        slug
-        sourceUrl
-        altText
-        title
-        mediaDetails {
-          width
-          height
         }
       }
     }

@@ -23,7 +23,7 @@ const ICONS: Record<MediaKind, LucideIcon> = {
   wallpaper: ImageIcon,
   fanart: Palette,
   video: MonitorPlay,
-  trailer: Clapperboard,
+  breakdown: Clapperboard,
 };
 
 const EMPTY: Partial<Record<MediaKind, { text: string; cta?: { label: string; href: string } }>> = {
@@ -31,9 +31,9 @@ const EMPTY: Partial<Record<MediaKind, { text: string; cta?: { label: string; hr
     text: "No fan art in the locker yet. Made something neon? Share it with the community and it could be featured here — always credited to you.",
     cta: { label: "Share your art", href: "/community/fan-art" },
   },
-  video: {
-    text: "Frame-by-frame breakdowns are being cut right now. Until then, the official trailers are below.",
-    cta: { label: "Jump to trailers", href: "#trailers" },
+  breakdown: {
+    text: "Frame-by-frame breakdowns are being cut right now. Until then, watch the official trailers above.",
+    cta: { label: "Jump to videos", href: "#videos" },
   },
 };
 
@@ -61,14 +61,14 @@ export default async function MediaPage() {
             >
               <Icon className="h-3.5 w-3.5" aria-hidden="true" />
               {section.title}
-              <span className="tabular-nums text-neon-blue">{library[section.kind].items.length}</span>
+              <span className="tabular-nums text-neon-blue">{library[section.kind].length}</span>
             </a>
           );
         })}
       </nav>
 
       {MEDIA_SECTIONS.map((section) => {
-        const { items } = library[section.kind];
+        const items = library[section.kind];
         const Icon = ICONS[section.kind];
         const empty = EMPTY[section.kind];
         return (
@@ -89,8 +89,8 @@ export default async function MediaPage() {
 
             <FadeIn>
               {items.length ? (
-                section.kind === "video" || section.kind === "trailer" ? (
-                  <YouTubeGrid items={items} featureFirst={section.kind === "trailer"} />
+                section.kind === "video" || section.kind === "breakdown" ? (
+                  <YouTubeGrid items={items} featureFirst={section.kind === "video"} />
                 ) : (
                   <MediaImageGrid items={items} layout={section.kind === "fanart" ? "art" : "wallpapers"} />
                 )

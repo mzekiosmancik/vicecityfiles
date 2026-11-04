@@ -125,7 +125,7 @@ export function MediaImageGrid({ items, layout = "wallpapers" }: MediaImageGridP
               </p>
               <div className="flex items-center gap-2">
                 <a
-                  href={current.image.url}
+                  href={current.fullUrl ?? current.image.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-md border border-white/15 px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-neon-blue transition-colors hover:text-neon-pink"

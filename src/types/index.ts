@@ -140,7 +140,8 @@ export interface CommunityPost {
 
 /* ── Media gallery ──────────────────────────────────── */
 
-export type MediaKind = "wallpaper" | "fanart" | "video" | "trailer";
+/** Mirrors the CMS `galerycategory` select: Wallpaper, Fan Arts, Video, Video Breakdown. */
+export type MediaKind = "wallpaper" | "fanart" | "video" | "breakdown";
 
 export interface MediaItem {
   id: string;
@@ -150,6 +151,8 @@ export interface MediaItem {
   /** Still image: the artwork itself, or a video's thumbnail. */
   image: ImageAsset;
   youtubeId?: string;
+  /** Full-resolution file to open/download (CMS `wallpaperUrl`); defaults to image.url. */
+  fullUrl?: string;
   /** Who made it (fan art) or who owns it (official material). */
   credit?: string;
   creditUrl?: string;

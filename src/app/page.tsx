@@ -35,7 +35,7 @@ export default async function HomePage() {
     ]);
   const mapRegions = buildMapRegions(wikiEntries);
   const mediaCovers = Object.fromEntries(
-    Object.entries(mediaLibrary).map(([kind, { items }]) => [kind, { cover: items[0]?.image, count: items.length }]),
+    Object.entries(mediaLibrary).map(([kind, items]) => [kind, { cover: items[0]?.image, count: items.length }]),
   ) as Parameters<typeof MediaGallerySection>[0]["library"];
   const tickerArticles = recentArticles.slice(0, 6);
   const recentWiki = [...wikiEntries]

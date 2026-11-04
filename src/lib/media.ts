@@ -1,4 +1,4 @@
-import type { ImageAsset, MediaItem, MediaKind } from "@/types";
+import type { ImageAsset, MediaKind } from "@/types";
 
 /* ── Sections ───────────────────────────────────────── */
 
@@ -18,26 +18,27 @@ export const MEDIA_SECTIONS: { kind: MediaKind; id: string; title: string; descr
   {
     kind: "video",
     id: "videos",
-    title: "Video Breakdowns",
-    description: "Frame-by-frame analysis and evidence reviews.",
+    title: "Videos & Trailers",
+    description: "Official trailers and videos, played straight from YouTube. Never rehosted.",
   },
   {
-    kind: "trailer",
-    id: "trailers",
-    title: "Trailer Archive",
-    description: "Official trailers, played straight from Rockstar Games' YouTube channel. Never rehosted.",
+    kind: "breakdown",
+    id: "breakdowns",
+    title: "Video Breakdowns",
+    description: "Frame-by-frame analysis and evidence reviews.",
   },
 ];
 
 /* ── CMS parsing ────────────────────────────────────── */
 
-/** "Type: Fan Art" → "fanart". Unknown values return null. */
-export function parseMediaKind(raw?: string): MediaKind | null {
+/** CMS category ("Fan Arts", "Video Breakdown", …) → MediaKind. Unknown values return null. */
+export function parseMediaKind(raw?: string | null): MediaKind | null {
   const v = raw?.toLowerCase().replace(/[^a-z]/g, "") ?? "";
-  if (v.startsWith("wallpaper") || v === "screenshot" || v === "screenshots") return "wallpaper";
+  if (!v) return null;
+  if (v.startsWith("wallpaper") || v.startsWith("screenshot")) return "wallpaper";
   if (v.startsWith("fanart") || v === "art" || v === "artwork") return "fanart";
-  if (v.startsWith("trailer")) return "trailer";
-  if (v.startsWith("video") || v.startsWith("breakdown") || v === "analysis") return "video";
+  if (v.includes("breakdown") || v === "analysis") return "breakdown";
+  if (v.startsWith("video") || v.startsWith("trailer")) return "video";
   return null;
 }
 
@@ -52,49 +53,4 @@ export function parseYouTubeId(raw?: string): string | undefined {
 
 export function youtubeThumbnail(id: string, title: string): ImageAsset {
   return { url: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`, alt: title, width: 480, height: 360 };
-}
-
-/* ── Defaults (used only while a section has no CMS items) ── */
-
-/**
- * Official GTA VI screenshots already in the WordPress media library (Rockstar's own
- * file names). Shown as wallpapers until editors add `Type: Wallpaper` gallery posts.
- */
-export const DEFAULT_WALLPAPER_SLUGS = [
-  "jason_duval_03",
-  "lucia_caminos_02",
-  "jason_duval_01",
-  "cal_hampton_01",
-  "boobie_ike_01",
-  "drequan_priest_03",
-  "real_dimez_04",
-  "raul_bautista_04",
-  "brian_heder_02",
-];
-
-export const OFFICIAL_CREDIT = "© Rockstar Games";
-export const OFFICIAL_CREDIT_URL = "https://www.rockstargames.com/VI";
-
-/** Official trailers on Rockstar's YouTube channel (IDs verified via YouTube oEmbed). */
-export const DEFAULT_TRAILERS: MediaItem[] = [
-  { id: "VQRLujxTm3c", title: "Grand Theft Auto VI Trailer 2", date: "2025-05-06" },
-  { id: "QdBZY2fkU-0", title: "Grand Theft Auto VI Trailer 1", date: "2023-12-05" },
-].map((t) => ({
-  id: `yt-${t.id}`,
-  kind: "trailer" as const,
-  title: t.title,
-  youtubeId: t.id,
-  image: youtubeThumbnail(t.id, t.title),
-  credit: "Rockstar Games",
-  creditUrl: "https://www.youtube.com/@RockstarGames",
-  date: t.date,
-}));
-
-/** "Jason_Duval_03" → "Jason Duval" */
-export function titleFromFileName(name: string): string {
-  return name
-    .replace(/[-_]+\d+$/g, "")
-    .replace(/[-_]+/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
-    .trim();
 }
