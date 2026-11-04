@@ -23,6 +23,7 @@ export function AddToCart({ product }: { product: Product }) {
         slug: product.slug,
         name: selectedVariant ? `${product.name} — ${selectedVariant.label}` : product.name,
         price: unitPrice,
+        currency: product.currency,
         variant,
         image: product.images[0]?.url,
       },
@@ -53,7 +54,7 @@ export function AddToCart({ product }: { product: Product }) {
                 )}
               >
                 {v.label}
-                {v.priceDelta ? ` (+${formatPrice(v.priceDelta)})` : ""}
+                {v.priceDelta ? ` (+${formatPrice(v.priceDelta, product.currency)})` : ""}
               </button>
             ))}
           </div>
@@ -90,7 +91,7 @@ export function AddToCart({ product }: { product: Product }) {
           ) : (
             <>
               <ShoppingCart className="h-5 w-5" aria-hidden="true" />
-              {product.inStock ? `Add to Cart — ${formatPrice(unitPrice * quantity)}` : "Sold Out"}
+              {product.inStock ? `Add to Cart — ${formatPrice(unitPrice * quantity, product.currency)}` : "Sold Out"}
             </>
           )}
         </Button>

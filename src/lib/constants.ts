@@ -55,16 +55,6 @@ export const NEWS_CATEGORIES = [
   "Analysis",
 ] as const;
 
-export const STORE_CATEGORIES = [
-  "T-Shirts",
-  "Hoodies",
-  "Posters",
-  "Caps",
-  "Mugs",
-  "Wallpapers",
-  "Accessories",
-] as const;
-
 export const RUMOR_LEVELS = {
   confirmed: { label: "Confirmed", color: "#39ff88", value: 100 },
   likely: { label: "Likely", color: "#00e5ff", value: 70 },

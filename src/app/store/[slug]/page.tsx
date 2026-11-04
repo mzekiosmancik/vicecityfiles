@@ -92,10 +92,10 @@ export default async function ProductPage({ params }: PageProps) {
 
           <div className="mt-3 flex items-center gap-4">
             <div className="flex items-baseline gap-3">
-              <span className="font-mono text-2xl font-bold text-neon-blue">{formatPrice(product.price)}</span>
+              <span className="font-mono text-2xl font-bold text-neon-blue">{formatPrice(product.price, product.currency)}</span>
               {product.compareAtPrice && (
                 <span className="font-mono text-lg text-muted-foreground line-through">
-                  {formatPrice(product.compareAtPrice)}
+                  {formatPrice(product.compareAtPrice, product.currency)}
                 </span>
               )}
             </div>

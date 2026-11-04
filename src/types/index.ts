@@ -121,6 +121,8 @@ export interface CartItem {
   image?: string;
   variant?: string;
   quantity: number;
+  /** ISO currency of the product when it was added (from WooCommerce). */
+  currency?: string;
 }
 
 /* ── Community ──────────────────────────────────────── */
