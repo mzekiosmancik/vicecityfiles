@@ -5,12 +5,14 @@ import {
   GET_ARTICLE_BY_SLUG,
   GET_ALL_ARTICLE_SLUGS,
   GET_GALERY_ITEMS,
+  GET_MAP_IMAGE,
   wikiEntriesQuery,
   wikiEntryBySlugQuery,
 } from "@/graphql/queries";
 //import { MOCK_ARTICLES, MOCK_WIKI } from "@/lib/mock-data";
 import { readingTime } from "@/lib/utils";
-import type { Article, ImageAsset, WikiCategorySlug, WikiEntry } from "@/types";
+import type { Article, ImageAsset, MediaItem, MediaKind, WikiCategorySlug, WikiEntry } from "@/types";
+import { parseMediaKind, parseYouTubeId, youtubeThumbnail } from "@/lib/media";
 import { RUMOR_LEVELS, type RumorLevel } from "@/lib/constants";
 
 /* ── WPGraphQL response shapes ──────────────────────── */
@@ -127,14 +129,29 @@ function mapWikiNode(node: WpWikiNode, category: WikiCategorySlug): WikiEntry {
   };
 }
 
+/**
+ * Stats come from a free-text ACF field. Editors write them as "Key: Value" lines
+ * (e.g. "Region: Vice City\nTagline: Everything in Excess"); a JSON array of
+ * { label, value } is also accepted.
+ */
 function safeParseStats(raw?: string): { label: string; value: string }[] {
-  if (!raw) return [];
+  if (!raw?.trim()) return [];
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (Array.isArray(parsed)) return parsed;
   } catch {
-    return [];
+    // not JSON — fall through to line parsing
   }
+  return raw
+    .split(/\r?\n/)
+    .map((line) => {
+      const i = line.indexOf(":");
+      if (i <= 0) return null;
+      const label = stripHtml(line.slice(0, i)).trim();
+      const value = stripHtml(line.slice(i + 1)).trim();
+      return label && value ? { label, value } : null;
+    })
+    .filter((s): s is { label: string; value: string } => s !== null);
 }
 
 /* ── Public API: Articles ───────────────────────────── */
@@ -241,23 +258,84 @@ export async function getAllWikiEntries(): Promise<WikiEntry[]> {
 interface WpGaleryNode {
   id: string;
   title: string;
+  date?: string;
   featuredImage?: { node: WpImage };
+  galeryFields?: { category?: string[] | string | null; videourl?: string | null; wallpaperurl?: string | null };
+  wikifields?: { summary?: string; stats?: string };
 }
 
-export async function getGaleryImages(limit = 12): Promise<ImageAsset[]> {
+function toImage(img: WpImage, fallbackAlt: string): ImageAsset {
+  return {
+    url: img.sourceUrl,
+    alt: img.altText || fallbackAlt,
+    width: img.mediaDetails?.width,
+    height: img.mediaDetails?.height,
+  };
+}
+
+const CMS_HOST = process.env.WORDPRESS_HOSTNAME || "cms.vicecityfiles.com";
+
+function mapGaleryNode(node: WpGaleryNode): MediaItem | null {
+  const title = stripHtml(node.title);
+  const fields = node.galeryFields ?? {};
+  const stats = safeParseStats(node.wikifields?.stats);
+  const stat = (...labels: string[]) => stats.find((s) => labels.includes(s.label.toLowerCase()))?.value;
+
+  const rawCategory = Array.isArray(fields.category) ? fields.category[0] : fields.category;
+  const youtubeId = parseYouTubeId(fields.videourl ?? undefined);
+  const wallpaperUrl = fields.wallpaperurl || undefined;
+  const kind = parseMediaKind(rawCategory) ?? (youtubeId ? "video" : "wallpaper");
+
+  // Image: featured image → the wallpaper file itself (if it's on the CMS) → YouTube thumbnail.
+  let image: ImageAsset | null = null;
+  if (node.featuredImage) image = toImage(node.featuredImage.node, title);
+  else if (wallpaperUrl && new URL(wallpaperUrl, `https://${CMS_HOST}`).hostname === CMS_HOST)
+    image = { url: wallpaperUrl, alt: title };
+  else if (youtubeId) image = youtubeThumbnail(youtubeId, title);
+  if (!image) return null; // nothing to show
+
+  return {
+    id: node.id,
+    kind,
+    title,
+    caption: node.wikifields?.summary || undefined,
+    image,
+    youtubeId,
+    fullUrl: wallpaperUrl,
+    credit: stat("credit", "artist", "by"),
+    creditUrl: stat("credit url", "artist url", "link"),
+    date: node.date,
+  };
+}
+
+export type MediaLibrary = Record<MediaKind, MediaItem[]>;
+
+/** Every published gallery post, grouped by its `galerycategory`. */
+export async function getMediaLibrary(): Promise<MediaLibrary> {
   const data = await fetchGraphQL<{ galeries: { nodes: WpGaleryNode[] } }>(
     GET_GALERY_ITEMS,
-    { first: limit },
+    { first: 100 },
     { tags: ["wordpress", "galery"] },
   );
+  const items = (data?.galeries?.nodes ?? []).map(mapGaleryNode).filter((i): i is MediaItem => i !== null);
+  const of = (kind: MediaKind) => items.filter((i) => i.kind === kind);
+  return { wallpaper: of("wallpaper"), fanart: of("fanart"), video: of("video"), breakdown: of("breakdown") };
+}
 
-  const nodes = data?.galeries?.nodes ?? [];
-  return nodes
-    .filter((n) => n.featuredImage)
-    .map((n) => ({
-      url: n.featuredImage!.node.sourceUrl,
-      alt: n.featuredImage!.node.altText || stripHtml(n.title),
-      width: n.featuredImage!.node.mediaDetails?.width,
-      height: n.featuredImage!.node.mediaDetails?.height,
-    }));
+/* ── Public API: City Grid map image ────────────────── */
+
+/**
+ * Map art for the City Grid. Upload an image to the WordPress media library with the
+ * slug `city-grid-map` to replace the built-in illustrated map. Returns null if absent.
+ */
+export async function getMapImage(): Promise<ImageAsset | null> {
+  const data = await fetchGraphQL<{ mediaItem: WpImage | null }>(GET_MAP_IMAGE, {}, { tags: ["wordpress", "map"] });
+  const item = data?.mediaItem;
+  if (!item?.sourceUrl) return null;
+  return {
+    url: item.sourceUrl,
+    alt: item.altText || "Map of Leonida",
+    width: item.mediaDetails?.width,
+    height: item.mediaDetails?.height,
+  };
 }

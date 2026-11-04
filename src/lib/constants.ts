@@ -10,6 +10,18 @@ export const SITE = {
     "Vice City Files is an unofficial fan site and is not affiliated with Rockstar Games or Take-Two Interactive. All trademarks belong to their respective owners.",
 } as const;
 
+/**
+ * Launch milestones. Rockstar unlocks both at midnight *local* time, so these are
+ * calendar dates (month is 1-based) resolved in the viewer's time zone, not UTC instants.
+ */
+export const LAUNCH = {
+  game: "GTA 6",
+  preload: { year: 2026, month: 11, day: 10, label: "Pre-load opens" },
+  release: { year: 2026, month: 11, day: 19, label: "Launch" },
+  /** Article with the full timing breakdown. */
+  guideSlug: "gta-6-launch-checklist",
+} as const;
+
 export const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Wiki", href: "/wiki" },
@@ -41,16 +53,6 @@ export const NEWS_CATEGORIES = [
   "Features",
   "Guides",
   "Analysis",
-] as const;
-
-export const STORE_CATEGORIES = [
-  "T-Shirts",
-  "Hoodies",
-  "Posters",
-  "Caps",
-  "Mugs",
-  "Wallpapers",
-  "Accessories",
 ] as const;
 
 export const RUMOR_LEVELS = {

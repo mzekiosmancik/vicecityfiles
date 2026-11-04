@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Clock, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ArticleCover } from "@/components/shared/article-cover";
 import { MediaImage } from "@/components/shared/media-image";
 import { RumorMeter } from "@/components/shared/rumor-meter";
 import { formatDate } from "@/lib/utils";
@@ -10,12 +11,21 @@ export function ArticleCard({ article, priority = false }: { article: Article; p
   return (
     <article className="group h-full">
       <Link href={`/news/${article.slug}`} className="glass neon-border-hover flex h-full flex-col overflow-hidden rounded-lg">
-        <MediaImage
-          image={article.featuredImage}
-          className="aspect-video w-full transition-transform duration-500 group-hover:scale-[1.02]"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          priority={priority}
-        />
+        {article.featuredImage.url ? (
+          <MediaImage
+            image={article.featuredImage}
+            className="aspect-video w-full transition-transform duration-500 group-hover:scale-[1.02]"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            priority={priority}
+          />
+        ) : (
+          <ArticleCover
+            category={article.category}
+            rumorLevel={article.rumorLevel}
+            seed={article.id}
+            className="aspect-video w-full"
+          />
+        )}
         <div className="flex flex-1 flex-col p-5">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <Badge variant="blue">{article.category}</Badge>

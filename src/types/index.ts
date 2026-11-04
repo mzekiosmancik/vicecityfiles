@@ -121,6 +121,8 @@ export interface CartItem {
   image?: string;
   variant?: string;
   quantity: number;
+  /** ISO currency of the product when it was added (from WooCommerce). */
+  currency?: string;
 }
 
 /* ── Community ──────────────────────────────────────── */
@@ -138,18 +140,25 @@ export interface CommunityPost {
   image?: ImageAsset;
 }
 
-/* ── Map ────────────────────────────────────────────── */
+/* ── Media gallery ──────────────────────────────────── */
 
-export interface MapRegion {
+/** Mirrors the CMS `galerycategory` select: Wallpaper, Fan Arts, Video, Video Breakdown. */
+export type MediaKind = "wallpaper" | "fanart" | "video" | "breakdown";
+
+export interface MediaItem {
   id: string;
-  name: string;
-  description: string;
-  color: string;
-  /** SVG path for the stylized fallback map */
-  path: string;
-  /** [lng, lat] for Mapbox mode */
-  center: [number, number];
-  wikiSlug?: string;
+  kind: MediaKind;
+  title: string;
+  caption?: string;
+  /** Still image: the artwork itself, or a video's thumbnail. */
+  image: ImageAsset;
+  youtubeId?: string;
+  /** Full-resolution file to open/download (CMS `wallpaperUrl`); defaults to image.url. */
+  fullUrl?: string;
+  /** Who made it (fan art) or who owns it (official material). */
+  credit?: string;
+  creditUrl?: string;
+  date?: string;
 }
 
 /* ── Search ─────────────────────────────────────────── */

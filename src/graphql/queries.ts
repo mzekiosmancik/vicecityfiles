@@ -98,13 +98,21 @@ export const GET_ALL_ARTICLE_SLUGS = /* GraphQL */ `
   }
 `;
 
-/** Homepage media gallery — sourced from the `galery` CPT. */
+/**
+ * Media gallery — the `galery` CPT. ACF group `galeryFields`:
+ *   category      select: Wallpaper | Fan Arts | Video | Video Breakdown
+ *   videourl      YouTube link (Video / Video Breakdown)
+ *   wallpaperurl  full-resolution file (Wallpaper)
+ * Featured image = the artwork or a custom thumbnail. `wikifields.summary` is the caption;
+ * `wikifields.stats` may add "Credit:" / "Artist:" and "Credit URL:" / "Artist URL:" lines.
+ */
 export const GET_GALERY_ITEMS = /* GraphQL */ `
-  query GetGaleryItems($first: Int = 12) {
+  query GetGaleryItems($first: Int = 100) {
     galeries(first: $first, where: { status: PUBLISH }) {
       nodes {
         id
         title
+        date
         featuredImage {
           node {
             sourceUrl
@@ -114,6 +122,15 @@ export const GET_GALERY_ITEMS = /* GraphQL */ `
               height
             }
           }
+        }
+        galeryFields {
+          category
+          videourl
+          wallpaperurl
+        }
+        wikifields {
+          summary
+          stats
         }
       }
     }
@@ -182,6 +199,32 @@ export const wikiEntryBySlugQuery = (graphqlSingular: string) => /* GraphQL */ `
 `;
 
 /** WooGraphQL products */
+/*
+ * WooGraphQL products. `price(format: RAW)` is the number we compute with; the
+ * `formattedPrice` alias (FORMATTED) carries the store's currency symbol.
+ */
+const PRODUCT_PRICE_FIELDS = /* GraphQL */ `
+  ... on SimpleProduct {
+    price(format: RAW)
+    regularPrice(format: RAW)
+    formattedPrice: price
+    stockStatus
+  }
+  ... on VariableProduct {
+    price(format: RAW)
+    formattedPrice: price
+    stockStatus
+    variations(first: 50) {
+      nodes {
+        id
+        name
+        price(format: RAW)
+        stockStatus
+      }
+    }
+  }
+`;
+
 export const GET_PRODUCTS = /* GraphQL */ `
   query GetProducts($first: Int = 24, $category: String) {
     products(first: $first, where: { category: $category, status: "publish" }) {
@@ -190,22 +233,9 @@ export const GET_PRODUCTS = /* GraphQL */ `
         slug
         name
         description
-        ... on SimpleProduct {
-          price(format: RAW)
-          regularPrice(format: RAW)
-          stockStatus
-        }
-        ... on VariableProduct {
-          price(format: RAW)
-          stockStatus
-          variations(first: 20) {
-            nodes {
-              id
-              name
-              price(format: RAW)
-            }
-          }
-        }
+        shortDescription
+        featured
+        ${PRODUCT_PRICE_FIELDS}
         image {
           sourceUrl
           altText
@@ -219,6 +249,7 @@ export const GET_PRODUCTS = /* GraphQL */ `
         productCategories(first: 1) {
           nodes {
             name
+            slug
           }
         }
         reviewCount
@@ -236,11 +267,9 @@ export const GET_PRODUCT_BY_SLUG = /* GraphQL */ `
       name
       description
       shortDescription
-      ... on SimpleProduct {
-        price(format: RAW)
-        regularPrice(format: RAW)
-        stockStatus
-      }
+      featured
+      status
+      ${PRODUCT_PRICE_FIELDS}
       image {
         sourceUrl
         altText
@@ -254,20 +283,37 @@ export const GET_PRODUCT_BY_SLUG = /* GraphQL */ `
       productCategories(first: 1) {
         nodes {
           name
+          slug
         }
       }
       reviewCount
       averageRating
       reviews(first: 10) {
-        nodes {
-          content
-          date
-          author {
-            node {
-              name
+        edges {
+          rating
+          node {
+            content
+            date
+            author {
+              node {
+                name
+              }
             }
           }
         }
+      }
+    }
+  }
+`;
+
+/** Store filter: product categories that have at least one product. */
+export const GET_PRODUCT_CATEGORIES = /* GraphQL */ `
+  query GetProductCategories {
+    productCategories(first: 100, where: { hideEmpty: true }) {
+      nodes {
+        name
+        slug
+        count
       }
     }
   }
@@ -280,6 +326,20 @@ export const SEARCH_CONTENT = /* GraphQL */ `
         slug
         title
         excerpt
+      }
+    }
+  }
+`;
+
+/** Optional City Grid map image: a WordPress media item with the slug `city-grid-map`. */
+export const GET_MAP_IMAGE = /* GraphQL */ `
+  query GetMapImage {
+    mediaItem(id: "city-grid-map", idType: SLUG) {
+      sourceUrl
+      altText
+      mediaDetails {
+        width
+        height
       }
     }
   }

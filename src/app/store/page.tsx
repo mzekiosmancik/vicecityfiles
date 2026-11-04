@@ -5,8 +5,7 @@ import { ProductCard } from "@/components/shared/product-card";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { StaggerContainer, StaggerItem } from "@/components/shared/motion";
 import { buildMetadata } from "@/lib/seo";
-import { STORE_CATEGORIES } from "@/lib/constants";
-import { getProducts } from "@/services/woocommerce";
+import { getProducts, getStoreCategories } from "@/services/woocommerce";
 
 export const revalidate = 600;
 
@@ -23,7 +22,8 @@ export const metadata = buildMetadata({
 
 export default async function StorePage({ searchParams }: PageProps) {
   const { category } = await searchParams;
-  const products = await getProducts({ category });
+  const [products, categories] = await Promise.all([getProducts({ category }), getStoreCategories()]);
+  const activeCategory = categories.find((c) => c.slug === category);
 
   return (
     <div className="container pt-28">
@@ -34,27 +34,31 @@ export default async function StorePage({ searchParams }: PageProps) {
         description="Every design is original fan art. Printed on demand, shipped worldwide, paid via Stripe."
       />
 
-      <nav className="mb-10 flex flex-wrap gap-2" aria-label="Store categories">
-        <Link href="/store">
-          <Badge variant={!category ? "default" : "outline"} className="cursor-pointer px-4 py-1.5">
-            All
-          </Badge>
-        </Link>
-        {STORE_CATEGORIES.map((cat) => (
-          <Link key={cat} href={`/store?category=${encodeURIComponent(cat.toLowerCase())}`}>
-            <Badge
-              variant={category?.toLowerCase() === cat.toLowerCase() ? "default" : "outline"}
-              className="cursor-pointer px-4 py-1.5 hover:border-neon-pink/40 hover:text-neon-pink"
-            >
-              {cat}
+      {/* Categories come from WooCommerce; hidden until there's more than one to choose from */}
+      {categories.length > 0 && (
+        <nav className="mb-10 flex flex-wrap gap-2" aria-label="Store categories">
+          <Link href="/store">
+            <Badge variant={!category ? "default" : "outline"} className="cursor-pointer px-4 py-1.5">
+              All
             </Badge>
           </Link>
-        ))}
-      </nav>
+          {categories.map((cat) => (
+            <Link key={cat.slug} href={`/store?category=${encodeURIComponent(cat.slug)}`}>
+              <Badge
+                variant={category === cat.slug ? "default" : "outline"}
+                className="cursor-pointer px-4 py-1.5 hover:border-neon-pink/40 hover:text-neon-pink"
+              >
+                {cat.name}
+                <span className="ml-1.5 opacity-60">{cat.count}</span>
+              </Badge>
+            </Link>
+          ))}
+        </nav>
+      )}
 
       {products.length === 0 ? (
         <p className="glass rounded-lg p-10 text-center font-mono text-sm text-muted-foreground">
-          Nothing in this drop yet. Check back soon.
+          {activeCategory ? `Nothing in ${activeCategory.name} right now.` : "Nothing in this drop yet. Check back soon."}
         </p>
       ) : (
         <StaggerContainer className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">

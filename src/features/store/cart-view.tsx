@@ -10,6 +10,7 @@ import { formatPrice } from "@/lib/utils";
 
 export function CartView() {
   const { items, subtotal, removeItem, updateQuantity } = useCart();
+  const currency = items[0]?.currency;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,7 +57,7 @@ export function CartView() {
               <Link href={`/store/${item.slug}`} className="font-display font-bold hover:text-neon-pink">
                 {item.name}
               </Link>
-              <p className="font-mono text-sm text-neon-blue">{formatPrice(item.price)}</p>
+              <p className="font-mono text-sm text-neon-blue">{formatPrice(item.price, item.currency)}</p>
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -91,7 +92,7 @@ export function CartView() {
         <Separator className="my-4" />
         <div className="flex justify-between font-mono text-sm">
           <span className="text-muted-foreground">Subtotal</span>
-          <span>{formatPrice(subtotal)}</span>
+          <span>{formatPrice(subtotal, currency)}</span>
         </div>
         <div className="mt-2 flex justify-between font-mono text-sm">
           <span className="text-muted-foreground">Shipping</span>
@@ -100,7 +101,7 @@ export function CartView() {
         <Separator className="my-4" />
         <div className="flex justify-between font-display text-lg font-bold">
           <span>Total</span>
-          <span className="text-neon-blue">{formatPrice(subtotal)}</span>
+          <span className="text-neon-blue">{formatPrice(subtotal, currency)}</span>
         </div>
         {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
         <Button variant="gradient" size="lg" className="mt-6 w-full" onClick={handleCheckout} disabled={loading}>

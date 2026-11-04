@@ -1,6 +1,13 @@
 import { cn } from "@/lib/utils";
 
+/** "Section 03 // Intel Reports" — numbered by position so labels follow the page order. */
+export function sectionEyebrow(index: number, name: string) {
+  return `Section ${String(index).padStart(2, "0")} // ${name}`;
+}
+
 interface SectionHeadingProps {
+  /** Set on the <h2> so a parent <section aria-labelledby> can reference it. */
+  id?: string;
   eyebrow?: string;
   title: string;
   description?: string;
@@ -8,11 +15,11 @@ interface SectionHeadingProps {
   className?: string;
 }
 
-export function SectionHeading({ eyebrow, title, description, align = "left", className }: SectionHeadingProps) {
+export function SectionHeading({ id, eyebrow, title, description, align = "left", className }: SectionHeadingProps) {
   return (
-    <div className={cn("mb-10 max-w-2xl", align === "center" && "mx-auto text-center", className)}>
+    <div className={cn("mb-8 max-w-2xl sm:mb-10", align === "center" && "mx-auto text-center", className)}>
       {eyebrow && <p className="evidence-tag mb-3">{eyebrow}</p>}
-      <h2 className="font-display text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">
+      <h2 id={id} className="font-display text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">
         <span className="gradient-text">{title}</span>
       </h2>
       {description && <p className="mt-3 text-muted-foreground">{description}</p>}

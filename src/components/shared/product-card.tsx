@@ -33,10 +33,10 @@ export function ProductCard({ product }: { product: Product }) {
           </h3>
           <div className="mt-auto flex items-center justify-between pt-3">
             <div className="flex items-baseline gap-2">
-              <span className="font-mono text-lg font-bold text-neon-blue">{formatPrice(product.price)}</span>
+              <span className="font-mono text-lg font-bold text-neon-blue">{formatPrice(product.price, product.currency)}</span>
               {onSale && (
                 <span className="font-mono text-sm text-muted-foreground line-through">
-                  {formatPrice(product.compareAtPrice!)}
+                  {formatPrice(product.compareAtPrice!, product.currency)}
                 </span>
               )}
             </div>

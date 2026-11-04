@@ -1,5 +1,6 @@
 import "server-only";
-import { MOCK_ARTICLES, MOCK_COMMUNITY, MOCK_PRODUCTS, MOCK_WIKI } from "@/lib/mock-data";
+import { MOCK_ARTICLES, MOCK_COMMUNITY, MOCK_WIKI } from "@/lib/mock-data";
+import { getProducts } from "@/services/woocommerce";
 import { truncate } from "@/lib/utils";
 import type { SearchResult } from "@/types";
 
@@ -42,7 +43,8 @@ export async function searchAll(term: string): Promise<SearchResult[]> {
     }
   }
 
-  for (const p of MOCK_PRODUCTS) {
+  // Products come from WooCommerce (cached), so search never links to products that don't exist.
+  for (const p of await getProducts({ limit: 100 })) {
     if (matches(p.name, p.description, p.category)) {
       results.push({
         type: "product",

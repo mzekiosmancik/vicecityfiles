@@ -6,8 +6,9 @@ import { useRef } from "react";
 import { ArrowRight, FileSearch, Newspaper, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SITE } from "@/lib/constants";
+import { LaunchPanel, type LaunchHeadline } from "@/features/home/launch-panel";
 
-export function Hero() {
+export function Hero({ headline }: { headline?: LaunchHeadline | null }) {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const skylineY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
@@ -66,80 +67,74 @@ export function Hero() {
       {/* bottom fade */}
       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent" aria-hidden="true" />
 
-      <div className="container relative z-10 pt-24">
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="evidence-tag mb-6"
-        >
-          Case File 001 — {SITE.altTagline}
-        </motion.p>
+      {/*
+        Phones: intro → launch panel → details, so the countdown lands in the first screen.
+        xl: intro + details stacked on the left, panel spanning both rows on the right.
+      */}
+      <div className="container relative z-10 grid items-center gap-8 pb-12 pt-24 sm:gap-12 sm:pb-24 xl:grid-cols-[minmax(0,1fr)_400px] xl:grid-rows-[auto_auto] xl:gap-y-0 xl:pb-0">
+        <div className="xl:col-start-1 xl:row-start-1 xl:self-end">
+          <p
+            className="animate-rise-in motion-reduce:animate-none [animation-delay:0ms] evidence-tag mb-4 sm:mb-6"
+          >
+            Case File 001 — {SITE.altTagline}
+          </p>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="max-w-4xl font-display text-5xl font-black uppercase leading-[0.95] tracking-tight sm:text-7xl lg:text-8xl"
-        >
-          <span className="gradient-text">Vice City</span>
-          <br />
-          <span className="text-neon-blue-glow">Files</span>
-        </motion.h1>
+          <h1
+            className="animate-rise-in motion-reduce:animate-none [animation-delay:100ms] max-w-4xl font-display text-5xl font-black uppercase leading-[0.95] tracking-tight sm:text-7xl lg:text-8xl"
+          >
+            <span className="gradient-text">Vice City</span>
+            <br />
+            <span className="text-neon-blue-glow">Files</span>
+          </h1>
+        </div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          className="mt-6 max-w-xl text-lg text-muted-foreground"
-        >
-          The ultimate fan archive for news, guides, characters, vehicles, maps, theories, and merchandise.
-        </motion.p>
+        <div className="animate-rise-in motion-reduce:animate-none [animation-delay:300ms] xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:justify-self-end">
+          <LaunchPanel headline={headline} />
+        </div>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.5 }}
-          className="mt-3 font-mono text-sm uppercase tracking-[0.3em] text-neon-pink"
-        >
-          {SITE.tagline}
-        </motion.p>
+        <div className="xl:col-start-1 xl:row-start-2 xl:self-start">
+          <p
+            className="animate-rise-in motion-reduce:animate-none [animation-delay:200ms] max-w-xl text-base sm:text-lg xl:mt-6 text-muted-foreground"
+          >
+            The ultimate fan archive for news, guides, characters, vehicles, maps, theories, and merchandise.
+          </p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.6 }}
-          className="mt-10 flex flex-wrap gap-4"
-        >
-          <Button asChild size="lg" variant="gradient">
-            <Link href="/wiki">
-              <FileSearch className="h-5 w-5" aria-hidden="true" />
-              Explore Wiki
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="outline-blue">
-            <Link href="/news">
-              <Newspaper className="h-5 w-5" aria-hidden="true" />
-              Latest News
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link href="/store">
-              <ShoppingBag className="h-5 w-5" aria-hidden="true" />
-              Shop Merch
-            </Link>
-          </Button>
-        </motion.div>
+          <p
+            className="animate-rise-in motion-reduce:animate-none [animation-delay:300ms] mt-3 font-mono text-sm uppercase tracking-[0.3em] text-neon-pink"
+          >
+            {SITE.tagline}
+          </p>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 1 }}
-          className="mt-16 hidden items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground sm:flex"
-        >
-          <ArrowRight className="h-3 w-3 rotate-90 animate-float" aria-hidden="true" />
-          Scroll to open the case files
-        </motion.div>
+          <div
+            className="animate-rise-in motion-reduce:animate-none [animation-delay:400ms] mt-8 flex flex-wrap gap-3 sm:mt-10 sm:gap-4"
+          >
+            <Button asChild size="lg" variant="gradient">
+              <Link href="/wiki">
+                <FileSearch className="h-5 w-5" aria-hidden="true" />
+                Explore Wiki
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline-blue">
+              <Link href="/news">
+                <Newspaper className="h-5 w-5" aria-hidden="true" />
+                Latest News
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link href="/store">
+                <ShoppingBag className="h-5 w-5" aria-hidden="true" />
+                Shop Merch
+              </Link>
+            </Button>
+          </div>
+
+          <div
+            className="animate-rise-in motion-reduce:animate-none [animation-delay:900ms] mt-16 hidden items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground xl:flex"
+          >
+            <ArrowRight className="h-3 w-3 rotate-90 animate-float" aria-hidden="true" />
+            Scroll to open the case files
+          </div>
+        </div>
       </div>
     </section>
   );
