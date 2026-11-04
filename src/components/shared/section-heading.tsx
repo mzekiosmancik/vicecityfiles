@@ -1,5 +1,10 @@
 import { cn } from "@/lib/utils";
 
+/** "Section 03 // Intel Reports" — numbered by position so labels follow the page order. */
+export function sectionEyebrow(index: number, name: string) {
+  return `Section ${String(index).padStart(2, "0")} // ${name}`;
+}
+
 interface SectionHeadingProps {
   /** Set on the <h2> so a parent <section aria-labelledby> can reference it. */
   id?: string;

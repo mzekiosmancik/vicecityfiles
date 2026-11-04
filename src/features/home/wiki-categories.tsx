@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { SectionHeading } from "@/components/shared/section-heading";
+import { SectionHeading, sectionEyebrow } from "@/components/shared/section-heading";
 import { WikiCard } from "@/components/shared/wiki-card";
 import { StaggerContainer, StaggerItem } from "@/components/shared/motion";
 import { WIKI_CATEGORIES } from "@/lib/constants";
 
-export function WikiCategoriesSection() {
+export function WikiCategoriesSection({ index }: { index: number }) {
   return (
     <section className="container py-20" aria-labelledby="wiki-categories">
       <div className="flex items-end justify-between gap-4">
         <SectionHeading id="wiki-categories"
-          eyebrow="Section 02 // The Archive"
+          eyebrow={sectionEyebrow(index, "The Archive")}
           title="Wiki Categories"
           description="Every file in the investigation, organized by department. Open a folder to dig in."
         />

@@ -3,16 +3,16 @@ import { ArrowRight, Fingerprint } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MediaImage } from "@/components/shared/media-image";
-import { SectionHeading } from "@/components/shared/section-heading";
+import { SectionHeading, sectionEyebrow } from "@/components/shared/section-heading";
 import { SlideUp } from "@/components/shared/motion";
 import type { WikiEntry } from "@/types";
 
-export function CharacterSpotlight({ character }: { character: WikiEntry | null }) {
+export function CharacterSpotlight({ character, index }: { character: WikiEntry | null; index: number }) {
   if (!character) return null;
 
   return (
     <section className="container py-20" aria-labelledby="character-spotlight">
-      <SectionHeading id="character-spotlight" eyebrow="Section 05 // Persons of Interest" title="Character Spotlight" />
+      <SectionHeading id="character-spotlight" eyebrow={sectionEyebrow(index, "Persons of Interest")} title="Character Spotlight" />
       <SlideUp>
         <div className="glass overflow-hidden rounded-lg lg:grid lg:grid-cols-2">
           <MediaImage image={character.heroImage} className="aspect-[4/3] w-full lg:aspect-auto lg:h-full" sizes="(max-width: 1024px) 100vw, 50vw" />

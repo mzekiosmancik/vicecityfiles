@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ArticleCard } from "@/components/shared/article-card";
-import { SectionHeading } from "@/components/shared/section-heading";
+import { SectionHeading, sectionEyebrow } from "@/components/shared/section-heading";
 import { StaggerContainer, StaggerItem } from "@/components/shared/motion";
 import type { Article } from "@/types";
 
-export function FeaturedArticles({ articles }: { articles: Article[] }) {
+export function FeaturedArticles({ articles, index }: { articles: Article[]; index: number }) {
   return (
     <section className="container py-20" aria-labelledby="featured-articles">
       <div className="flex items-end justify-between gap-4">
         <SectionHeading id="featured-articles"
-          eyebrow="Section 03 // Intel Reports"
+          eyebrow={sectionEyebrow(index, "Intel Reports")}
           title="Featured Articles"
           description="Deep-dive investigations, frame analysis, and rated rumors from the field team."
         />

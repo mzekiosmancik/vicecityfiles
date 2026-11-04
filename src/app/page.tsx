@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { NewsTicker } from "@/components/shared/news-ticker";
 import { Hero } from "@/features/home/hero";
 import { WikiCategoriesSection } from "@/features/home/wiki-categories";
@@ -27,26 +28,33 @@ export default async function HomePage() {
     ? { slug: top.slug, title: top.title, category: top.category, rumorLevel: top.rumorLevel }
     : null;
 
+  // Order = priority. Launch-season news leads; evergreen reference follows.
+  // Sections without data are dropped here so the "Section NN" labels stay sequential.
+  const character = characters[0] ?? null;
+  const sections: { key: string; render: (index: number) => React.ReactNode }[] = [
+    { key: "featured", render: (i) => <FeaturedArticles articles={featuredArticles} index={i} /> },
+    { key: "wiki", render: (i) => <WikiCategoriesSection index={i} /> },
+    { key: "map", render: (i) => <MapPreviewSection index={i} /> },
+    ...(character
+      ? [{ key: "character", render: (i: number) => <CharacterSpotlight character={character} index={i} /> }]
+      : []),
+    ...(products.length
+      ? [{ key: "merch", render: (i: number) => <MerchPreview products={products} index={i} /> }]
+      : []),
+    { key: "media", render: (i) => <MediaGallerySection images={galeryImages} index={i} /> },
+    { key: "community", render: (i) => <CommunitySection index={i} /> },
+  ];
+
   return (
     <>
-      {/* 1. Hero + launch countdown */}
+      {/* Hero + launch countdown (Case File 001) */}
       <Hero headline={heroHeadline} />
-      {/* 2. Breaking news ticker */}
+      {/* Breaking news ticker */}
       <NewsTicker articles={tickerArticles} />
-      {/* 3. Wiki categories */}
-      <WikiCategoriesSection />
-      {/* 4. Featured articles */}
-      <FeaturedArticles articles={featuredArticles} />
-      {/* 5. Map preview */}
-      <MapPreviewSection />
-      {/* 6. Character spotlight */}
-      <CharacterSpotlight character={characters[0] ?? null} />
-      {/* 7. Merch preview */}
-      <MerchPreview products={products} />
-      {/* 8. Media gallery */}
-      <MediaGallerySection images={galeryImages} />
-      {/* 9. Community + newsletter */}
-      <CommunitySection />
+      {/* Numbered sections start at 02 — the hero is file 01 */}
+      {sections.map((section, i) => (
+        <Fragment key={section.key}>{section.render(i + 2)}</Fragment>
+      ))}
     </>
   );
 }

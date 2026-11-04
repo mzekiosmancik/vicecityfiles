@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 import { Lightbulb, MessageSquare, Palette, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SectionHeading } from "@/components/shared/section-heading";
+import { SectionHeading, sectionEyebrow } from "@/components/shared/section-heading";
 import { StaggerContainer, StaggerItem } from "@/components/shared/motion";
 
 const COMMUNITY_LINKS = [
@@ -32,7 +32,7 @@ const COMMUNITY_LINKS = [
   },
 ];
 
-export function CommunitySection() {
+export function CommunitySection({ index }: { index: number }) {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
@@ -44,7 +44,7 @@ export function CommunitySection() {
   return (
     <section className="container py-20" aria-labelledby="community">
       <SectionHeading id="community"
-        eyebrow="Section 08 // The Bureau"
+        eyebrow={sectionEyebrow(index, "The Bureau")}
         title="Join the Investigation"
         description="Theories, art, arguments about car physics — this is where the case gets solved."
       />
