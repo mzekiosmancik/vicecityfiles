@@ -21,10 +21,16 @@ export default async function HomePage() {
     getGaleryImages(4),
   ]);
 
+  // Hero headline: newest confirmed story, else the newest story of any kind.
+  const top = tickerArticles.find((a) => a.rumorLevel === "confirmed") ?? tickerArticles[0];
+  const heroHeadline = top
+    ? { slug: top.slug, title: top.title, category: top.category, rumorLevel: top.rumorLevel }
+    : null;
+
   return (
     <>
-      {/* 1. Hero */}
-      <Hero />
+      {/* 1. Hero + launch countdown */}
+      <Hero headline={heroHeadline} />
       {/* 2. Breaking news ticker */}
       <NewsTicker articles={tickerArticles} />
       {/* 3. Wiki categories */}

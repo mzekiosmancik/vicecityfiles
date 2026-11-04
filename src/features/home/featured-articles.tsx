@@ -9,7 +9,7 @@ export function FeaturedArticles({ articles }: { articles: Article[] }) {
   return (
     <section className="container py-20" aria-labelledby="featured-articles">
       <div className="flex items-end justify-between gap-4">
-        <SectionHeading
+        <SectionHeading id="featured-articles"
           eyebrow="Section 03 // Intel Reports"
           title="Featured Articles"
           description="Deep-dive investigations, frame analysis, and rated rumors from the field team."

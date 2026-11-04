@@ -43,7 +43,7 @@ export function CommunitySection() {
 
   return (
     <section className="container py-20" aria-labelledby="community">
-      <SectionHeading
+      <SectionHeading id="community"
         eyebrow="Section 08 // The Bureau"
         title="Join the Investigation"
         description="Theories, art, arguments about car physics — this is where the case gets solved."

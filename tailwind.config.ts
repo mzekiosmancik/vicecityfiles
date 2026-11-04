@@ -102,6 +102,11 @@ const config: Config = {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        // Transform-only entrance: content stays visible on first paint (good for LCP / no-JS).
+        "rise-in": {
+          "0%": { transform: "translateY(16px)" },
+          "100%": { transform: "translateY(0)" },
+        },
       },
       animation: {
         ticker: "ticker 40s linear infinite",
@@ -109,6 +114,7 @@ const config: Config = {
         "pulse-neon": "pulse-neon 2.4s ease-in-out infinite",
         scanline: "scanline 8s linear infinite",
         float: "float 6s ease-in-out infinite",
+        "rise-in": "rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both",
       },
     },
   },

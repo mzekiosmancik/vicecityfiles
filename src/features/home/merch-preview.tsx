@@ -9,7 +9,7 @@ export function MerchPreview({ products }: { products: Product[] }) {
   return (
     <section className="container py-20" aria-labelledby="merch-preview">
       <div className="flex items-end justify-between gap-4">
-        <SectionHeading
+        <SectionHeading id="merch-preview"
           eyebrow="Section 06 // Contraband"
           title="The Merch Store"
           description="Original fan-designed hoodies, tees, posters, mugs, and stickers. Zero copyright violations, maximum neon."

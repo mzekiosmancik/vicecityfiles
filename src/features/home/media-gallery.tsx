@@ -43,7 +43,7 @@ interface MediaGallerySectionProps {
 export function MediaGallerySection({ images = [] }: MediaGallerySectionProps) {
   return (
     <section className="container py-20" aria-labelledby="media-gallery">
-      <SectionHeading
+      <SectionHeading id="media-gallery"
         eyebrow="Section 07 // Evidence Locker"
         title="Media Gallery"
         description="Wallpapers, fanart, video breakdowns, and the complete trailer archive."

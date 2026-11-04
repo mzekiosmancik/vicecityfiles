@@ -9,7 +9,7 @@ export function WikiCategoriesSection() {
   return (
     <section className="container py-20" aria-labelledby="wiki-categories">
       <div className="flex items-end justify-between gap-4">
-        <SectionHeading
+        <SectionHeading id="wiki-categories"
           eyebrow="Section 02 // The Archive"
           title="Wiki Categories"
           description="Every file in the investigation, organized by department. Open a folder to dig in."
