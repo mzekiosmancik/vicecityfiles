@@ -138,6 +138,24 @@ export interface CommunityPost {
   image?: ImageAsset;
 }
 
+/* ── Media gallery ──────────────────────────────────── */
+
+export type MediaKind = "wallpaper" | "fanart" | "video" | "trailer";
+
+export interface MediaItem {
+  id: string;
+  kind: MediaKind;
+  title: string;
+  caption?: string;
+  /** Still image: the artwork itself, or a video's thumbnail. */
+  image: ImageAsset;
+  youtubeId?: string;
+  /** Who made it (fan art) or who owns it (official material). */
+  credit?: string;
+  creditUrl?: string;
+  date?: string;
+}
+
 /* ── Search ─────────────────────────────────────────── */
 
 export interface SearchResult {

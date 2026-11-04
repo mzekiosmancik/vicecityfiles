@@ -5,13 +5,24 @@ import {
   GET_ARTICLE_BY_SLUG,
   GET_ALL_ARTICLE_SLUGS,
   GET_GALERY_ITEMS,
+  GET_MEDIA_BY_SLUGS,
   GET_MAP_IMAGE,
   wikiEntriesQuery,
   wikiEntryBySlugQuery,
 } from "@/graphql/queries";
 //import { MOCK_ARTICLES, MOCK_WIKI } from "@/lib/mock-data";
 import { readingTime } from "@/lib/utils";
-import type { Article, ImageAsset, WikiCategorySlug, WikiEntry } from "@/types";
+import type { Article, ImageAsset, MediaItem, MediaKind, WikiCategorySlug, WikiEntry } from "@/types";
+import {
+  DEFAULT_TRAILERS,
+  DEFAULT_WALLPAPER_SLUGS,
+  OFFICIAL_CREDIT,
+  OFFICIAL_CREDIT_URL,
+  parseMediaKind,
+  parseYouTubeId,
+  titleFromFileName,
+  youtubeThumbnail,
+} from "@/lib/media";
 import { RUMOR_LEVELS, type RumorLevel } from "@/lib/constants";
 
 /* ── WPGraphQL response shapes ──────────────────────── */
@@ -257,25 +268,100 @@ export async function getAllWikiEntries(): Promise<WikiEntry[]> {
 interface WpGaleryNode {
   id: string;
   title: string;
+  date?: string;
+  content?: string;
   featuredImage?: { node: WpImage };
+  wikifields?: { summary?: string; stats?: string };
 }
 
-export async function getGaleryImages(limit = 12): Promise<ImageAsset[]> {
+function toImage(img: WpImage, fallbackAlt: string): ImageAsset {
+  return {
+    url: img.sourceUrl,
+    alt: img.altText || fallbackAlt,
+    width: img.mediaDetails?.width,
+    height: img.mediaDetails?.height,
+  };
+}
+
+function mapGaleryNode(node: WpGaleryNode): MediaItem | null {
+  const title = stripHtml(node.title);
+  const stats = safeParseStats(node.wikifields?.stats);
+  const stat = (...labels: string[]) =>
+    stats.find((s) => labels.includes(s.label.toLowerCase()))?.value;
+
+  const youtubeId = parseYouTubeId(stat("youtube", "video", "url")) ?? parseYouTubeId(node.content);
+  const kind = parseMediaKind(stat("type", "kind", "section")) ?? (youtubeId ? "video" : "wallpaper");
+
+  const image = node.featuredImage
+    ? toImage(node.featuredImage.node, title)
+    : youtubeId
+      ? youtubeThumbnail(youtubeId, title)
+      : null;
+  if (!image) return null; // nothing to show
+
+  return {
+    id: node.id,
+    kind,
+    title,
+    caption: node.wikifields?.summary || undefined,
+    image,
+    youtubeId,
+    credit: stat("artist", "credit", "by"),
+    creditUrl: stat("artist url", "credit url", "link"),
+    date: node.date,
+  };
+}
+
+async function getDefaultWallpapers(): Promise<MediaItem[]> {
+  const data = await fetchGraphQL<{
+    mediaItems: { nodes: (WpImage & { slug: string; title: string })[] };
+  }>(GET_MEDIA_BY_SLUGS, { slugs: DEFAULT_WALLPAPER_SLUGS }, { tags: ["wordpress", "galery"] });
+
+  const bySlug = new Map((data?.mediaItems?.nodes ?? []).map((n) => [n.slug, n]));
+  return DEFAULT_WALLPAPER_SLUGS.flatMap((slug) => {
+    const n = bySlug.get(slug);
+    if (!n?.sourceUrl) return [];
+    const title = titleFromFileName(stripHtml(n.title) || slug);
+    return [
+      {
+        id: `media-${slug}`,
+        kind: "wallpaper" as const,
+        title,
+        caption: "Official screenshot",
+        image: toImage(n, `${title} — official GTA VI screenshot`),
+        credit: OFFICIAL_CREDIT,
+        creditUrl: OFFICIAL_CREDIT_URL,
+      },
+    ];
+  });
+}
+
+export type MediaLibrary = Record<MediaKind, { items: MediaItem[]; isDefault: boolean }>;
+
+/**
+ * Every gallery post grouped by kind. Sections with no CMS posts fall back to defaults:
+ * official screenshots for wallpapers and Rockstar's trailers for the trailer archive.
+ */
+export async function getMediaLibrary(): Promise<MediaLibrary> {
   const data = await fetchGraphQL<{ galeries: { nodes: WpGaleryNode[] } }>(
     GET_GALERY_ITEMS,
-    { first: limit },
+    { first: 100 },
     { tags: ["wordpress", "galery"] },
   );
+  const items = (data?.galeries?.nodes ?? []).map(mapGaleryNode).filter((i): i is MediaItem => i !== null);
+  const of = (kind: MediaKind) => items.filter((i) => i.kind === kind);
 
-  const nodes = data?.galeries?.nodes ?? [];
-  return nodes
-    .filter((n) => n.featuredImage)
-    .map((n) => ({
-      url: n.featuredImage!.node.sourceUrl,
-      alt: n.featuredImage!.node.altText || stripHtml(n.title),
-      width: n.featuredImage!.node.mediaDetails?.width,
-      height: n.featuredImage!.node.mediaDetails?.height,
-    }));
+  const wallpapers = of("wallpaper");
+  const trailers = of("trailer");
+
+  return {
+    wallpaper: wallpapers.length
+      ? { items: wallpapers, isDefault: false }
+      : { items: await getDefaultWallpapers(), isDefault: true },
+    fanart: { items: of("fanart"), isDefault: false },
+    video: { items: of("video"), isDefault: false },
+    trailer: trailers.length ? { items: trailers, isDefault: false } : { items: DEFAULT_TRAILERS, isDefault: true },
+  };
 }
 
 /* ── Public API: City Grid map image ────────────────── */

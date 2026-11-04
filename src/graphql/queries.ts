@@ -98,13 +98,19 @@ export const GET_ALL_ARTICLE_SLUGS = /* GraphQL */ `
   }
 `;
 
-/** Homepage media gallery — sourced from the `galery` CPT. */
+/**
+ * Media gallery — the `galery` CPT. Each post is one media item: featured image = artwork
+ * or thumbnail; `wikifields.stats` carries "Type: Wallpaper | Fan Art | Video | Trailer",
+ * plus optional "Artist:", "Artist URL:", "Credit:" and "YouTube:" lines.
+ */
 export const GET_GALERY_ITEMS = /* GraphQL */ `
-  query GetGaleryItems($first: Int = 12) {
+  query GetGaleryItems($first: Int = 100) {
     galeries(first: $first, where: { status: PUBLISH }) {
       nodes {
         id
         title
+        date
+        content
         featuredImage {
           node {
             sourceUrl
@@ -114,6 +120,28 @@ export const GET_GALERY_ITEMS = /* GraphQL */ `
               height
             }
           }
+        }
+        wikifields {
+          summary
+          stats
+        }
+      }
+    }
+  }
+`;
+
+/** Media library lookup by slug (used for default wallpapers). */
+export const GET_MEDIA_BY_SLUGS = /* GraphQL */ `
+  query GetMediaBySlugs($slugs: [String]) {
+    mediaItems(first: 50, where: { nameIn: $slugs }) {
+      nodes {
+        slug
+        sourceUrl
+        altText
+        title
+        mediaDetails {
+          width
+          height
         }
       }
     }

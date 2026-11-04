@@ -13,7 +13,7 @@ import {
   getAllWikiEntries,
   getArticles,
   getFeaturedArticles,
-  getGaleryImages,
+  getMediaLibrary,
   getMapImage,
   getWikiEntries,
 } from "@/services/wordpress";
@@ -23,17 +23,20 @@ import { buildMapRegions } from "@/lib/map";
 export const revalidate = 300; // ISR — refresh every 5 minutes
 
 export default async function HomePage() {
-  const [recentArticles, featuredArticles, characters, products, galeryImages, wikiEntries, mapImage] =
+  const [recentArticles, featuredArticles, characters, products, mediaLibrary, wikiEntries, mapImage] =
     await Promise.all([
       getArticles({ limit: 24 }), // same request getFeaturedArticles makes, so Next dedupes it
       getFeaturedArticles(3),
       getWikiEntries("characters"),
       getFeaturedProducts(4),
-      getGaleryImages(4),
+      getMediaLibrary(),
       getAllWikiEntries(),
       getMapImage(),
     ]);
   const mapRegions = buildMapRegions(wikiEntries);
+  const mediaCovers = Object.fromEntries(
+    Object.entries(mediaLibrary).map(([kind, { items }]) => [kind, { cover: items[0]?.image, count: items.length }]),
+  ) as Parameters<typeof MediaGallerySection>[0]["library"];
   const tickerArticles = recentArticles.slice(0, 6);
   const recentWiki = [...wikiEntries]
     .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
@@ -71,7 +74,7 @@ export default async function HomePage() {
     ...(products.length
       ? [{ key: "merch", render: (i: number) => <MerchPreview products={products} index={i} /> }]
       : []),
-    { key: "media", render: (i) => <MediaGallerySection images={galeryImages} index={i} /> },
+    { key: "media", render: (i) => <MediaGallerySection library={mediaCovers} index={i} /> },
     { key: "community", render: (i) => <CommunitySection index={i} /> },
   ];
 
