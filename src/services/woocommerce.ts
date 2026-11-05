@@ -1,6 +1,7 @@
 import "server-only";
 import { fetchGraphQL } from "@/graphql/client";
 import { GET_PRODUCTS, GET_PRODUCT_BY_SLUG, GET_PRODUCT_CATEGORIES } from "@/graphql/queries";
+import { decodeEntities } from "@/lib/html";
 import type { Product } from "@/types";
 
 /*
@@ -48,7 +49,7 @@ export interface StoreCategory {
 /* ── Mapping ────────────────────────────────────────── */
 
 function stripHtml(html?: string | null): string {
-  return (html ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  return decodeEntities((html ?? "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
 }
 
 /** WooGraphQL RAW prices can be "64", "80.00" or, for variable products, "25.00, 30.00". */
@@ -85,7 +86,7 @@ function mapProduct(p: WooProduct): Product | null {
   return {
     id: p.id,
     slug: p.slug,
-    name: p.name,
+    name: decodeEntities(p.name),
     description: stripHtml(p.description) || stripHtml(p.shortDescription),
     price,
     compareAtPrice: regular && regular > price ? regular : undefined,
