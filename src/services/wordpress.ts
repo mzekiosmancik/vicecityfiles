@@ -11,6 +11,7 @@ import {
 } from "@/graphql/queries";
 //import { MOCK_ARTICLES, MOCK_WIKI } from "@/lib/mock-data";
 import { readingTime } from "@/lib/utils";
+import { htmlToText } from "@/lib/html";
 import type { Article, ImageAsset, MediaItem, MediaKind, WikiCategorySlug, WikiEntry } from "@/types";
 import { parseMediaKind, parseYouTubeId, youtubeThumbnail } from "@/lib/media";
 import { RUMOR_LEVELS, type RumorLevel } from "@/lib/constants";
@@ -55,9 +56,7 @@ interface WpWikiNode {
 
 /* ── Mappers ────────────────────────────────────────── */
 
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]+>/g, "").trim();
-}
+const stripHtml = htmlToText;
 
 function mapPost(post: WpPost): Article {
   const content = stripHtml(post.content ?? "");
@@ -114,13 +113,13 @@ function mapWikiNode(node: WpWikiNode, category: WikiCategorySlug): WikiEntry {
     slug: node.slug,
     category,
     title: stripHtml(node.title),
-    summary: node.wikifields?.summary ?? "",
+    summary: stripHtml(node.wikifields?.summary),
     content: stripHtml(node.content ?? ""),
     heroImage: node.featuredImage
-      ? { url: node.featuredImage.node.sourceUrl, alt: node.featuredImage.node.altText || node.title }
-      : { url: "", alt: node.title, placeholder: "purple" },
+      ? { url: node.featuredImage.node.sourceUrl, alt: node.featuredImage.node.altText || stripHtml(node.title) }
+      : { url: "", alt: stripHtml(node.title), placeholder: "purple" },
     gallery: node.wikifields?.image
-      ? [{ url: node.wikifields.image.node.sourceUrl, alt: node.wikifields.image.node.altText || node.title }]
+      ? [{ url: node.wikifields.image.node.sourceUrl, alt: node.wikifields.image.node.altText || stripHtml(node.title) }]
       : [],
     stats: safeParseStats(node.wikifields?.stats),
     tags: [],
@@ -298,7 +297,7 @@ function mapGaleryNode(node: WpGaleryNode): MediaItem | null {
     id: node.id,
     kind,
     title,
-    caption: node.wikifields?.summary || undefined,
+    caption: stripHtml(node.wikifields?.summary) || undefined,
     image,
     youtubeId,
     fullUrl: wallpaperUrl,
